@@ -105,7 +105,7 @@ function defaultChainId(initialState, handler) {
 
 function getInitialPeers(peerSwarm) {
   return new Promise((resolve, reject) => {
-    let peerTimeout = 2000
+    let peerTimeout = 4000
     let peers = []
     let gotFirstPeer = false
     peerSwarm.on('connection', (conn, info) => {
@@ -123,13 +123,22 @@ function getInitialPeers(peerSwarm) {
             }
             let peerString = [info.host, port].join(':')
             peers.push(peerString)
+            if (!gotFirstPeer) {
+              gotFirstPeer = true
+              console.log(peerString)
+              setTimeout(() => {
+                resolve(peers)
+              }, 1000)
+            }
           }
         })
       }
     })
 
     setTimeout(() => {
-      resolve(peers)
+      if (!gotFirstPeer) {
+        resolve(peers)
+      }
     }, peerTimeout)
   })
 }
@@ -143,13 +152,11 @@ function reportSelfAsPeer(peerSwarm, p2pPort) {
 function downloadDat(dat) {
   return new Promise((resolve, reject) => {
     let stats = dat.trackStats()
-
     function updateHandler() {
       let status = stats.get()
-      if (status.length && status.downloaded === status.length) {
+      if (status.length && status.downloaded >= status.length) {
         stats.removeListener('update', updateHandler)
         resolve()
-        console.log('downloaded dat')
       }
     }
     stats.on('update', updateHandler)
@@ -169,10 +176,6 @@ module.exports = function Lotion(opts = {}) {
     // async setup stuff
     let { tendermintPort, abciPort, p2pPort } = await getPorts()
     let genesisKey = opts.genesisKey
-    if (typeof genesisKey === 'string') {
-      // temporary fix
-      // await rimraf(tendermintPath + '/data')
-    }
     await initNode(tendermintPath)
 
     let sharedDir = tendermintPath + '/shared'
@@ -216,7 +219,7 @@ module.exports = function Lotion(opts = {}) {
     app.use(json())
     app.post('/txs', async (req, res) => {
       // encode transaction bytes, send it to tendermint node
-      let txBytes = '0x' + encodeTx(req.body, txCountNetwork++).toString('hex')
+      let txBytes = '0x' + encodeTx(req.body, txCountNetwork).toString('hex')
       let result = await axios.get(
         `http://localhost:${tendermintPort}/broadcast_tx_commit`,
         {
@@ -259,9 +262,7 @@ module.exports = function Lotion(opts = {}) {
     let peerSwarm = swarm()
     peerSwarm.listen(peerSwarmPort)
     peerSwarm.join(genesisKey)
-    console.log('getting peers..')
     peers = peers.concat(await getInitialPeers(peerSwarm))
-    console.log('got peers')
     reportSelfAsPeer(peerSwarm, p2pPort)
     let tpArgs = [
       'node',
@@ -280,18 +281,13 @@ module.exports = function Lotion(opts = {}) {
     }
 
     let tendermintProcess = spawn(tmBin, tpArgs)
-    console.log('started tm process')
+    if (opts.logTendermint) {
+      tendermintProcess.stdout.pipe(process.stdout)
+      tendermintProcess.stderr.pipe(process.stderr)
+    }
     tendermintProcess.on('close', () => {
       throw new Error('Tendermint node crashed')
     })
-    if (opts.logTendermint) {
-      tendermintProcess.stdout.on('data', data => {
-        console.log(data.toString())
-      })
-      tendermintProcess.stderr.on('data', data => {
-        console.log(data.toString())
-      })
-    }
 
     // start tendermint-facing abci server
     let abciApp = new AbciApp()
