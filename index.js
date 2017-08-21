@@ -1,13 +1,10 @@
 let { promisify } = require('util')
-let abci = require('./lib/abci/')
 let express = require('express')
 let { json } = require('body-parser')
 let axios = require('axios')
 let { spawn } = require('child_process')
 let getPort = require('get-port')
 let tmBin = __dirname + '/bin/tendermint'
-let createHash = require('sha.js')
-let vstruct = require('varstruct')
 let level = require('level')
 let memdown = require('memdown')
 let fs = require('fs')
@@ -16,48 +13,9 @@ let writeFile = promisify(fs.writeFile)
 let Dat = promisify(require('dat-node'))
 let swarm = require('discovery-swarm')
 let rimraf = promisify(require('rimraf'))
+let encodeTx = require('./lib/tx-encoding.js').encode
 
-let TxStruct = vstruct([
-  { name: 'data', type: vstruct.VarString(vstruct.UInt32BE) },
-  { name: 'nonce', type: vstruct.UInt32BE }
-])
-
-function encodeTx(txData, nonce) {
-  let data = JSON.stringify(txData)
-  let bytes = TxStruct.encode({ nonce, data })
-  return bytes
-}
-
-function decodeTx(txBuffer) {
-  let decoded = TxStruct.decode(txBuffer)
-  let tx = JSON.parse(decoded.data)
-  return tx
-}
-
-class AbciApp {
-  constructor() {}
-  initChain(req, cb) {
-    cb()
-  }
-  info(req, cb) {
-    cb()
-  }
-  beginBlock(req, cb) {
-    cb()
-  }
-  endBlock(req, cb) {
-    cb()
-  }
-  commit(req, cb) {
-    cb()
-  }
-  checkTx(req, cb) {
-    throw new Error('You must override the default checkTx')
-  }
-  deliverTx(req, cb) {
-    throw new Error('You must override the default deliverTx')
-  }
-}
+let configureABCIServer = require('./lib/abci-app.js')
 
 async function getPorts() {
   let p2pPort = await getPort(46656)
@@ -72,35 +30,6 @@ function initNode(tendermintPath) {
     let tmInitProcess = spawn(tmBin, ['init', '--home', tendermintPath])
     tmInitProcess.on('close', resolve)
   })
-}
-
-function runTx(handler, appState, tx, allowMutation = false) {
-  let stateMutated = false
-  let invalidMutation = false
-  let hookedState = new Proxy(appState, {
-    get: (target, name) => {
-      if (stateMutated) {
-        invalidMutation = true
-      }
-      return target[name]
-    },
-    set: (target, name, value) => {
-      if (allowMutation) {
-        target[name] = value
-      }
-      stateMutated = true
-    }
-  })
-  handler(hookedState, tx)
-  return stateMutated && !invalidMutation
-}
-
-function defaultChainId(initialState, handler) {
-  let sha256 = createHash('sha256')
-  let chainId = sha256
-    .update(JSON.stringify(initialState) + handler.toString(), 'utf8')
-    .digest('hex')
-  return chainId
 }
 
 function getInitialPeers(peerSwarm) {
@@ -171,11 +100,23 @@ module.exports = function Lotion(opts = {}) {
   let port = opts.port || 3001
   let peers = opts.peers || []
 
-  return async function createServer(handler) {
+  return async function createServer(stateMachine) {
     let txCache = level({ db: memdown, valueEncoding: 'json' })
-    // async setup stuff
+    let txStats = {
+      txCountNetwork: 0
+    }
+
     let { tendermintPort, abciPort, p2pPort } = await getPorts()
     let genesisKey = opts.genesisKey
+
+    let appState = Object.assign({}, initialState)
+    let abciServer = configureABCIServer(
+      stateMachine,
+      appState,
+      txCache,
+      txStats
+    )
+    abciServer.listen(abciPort)
     await initNode(tendermintPath)
 
     let sharedDir = tendermintPath + '/shared'
@@ -210,16 +151,13 @@ module.exports = function Lotion(opts = {}) {
       genesisKey = dat.key.toString('hex')
     }
 
-    // hook app state modifications
-    let txCountNetwork = 0
-    let nodeNonce = 0
-    let appState = Object.assign({}, initialState)
     // start tx server
     let app = express()
     app.use(json())
     app.post('/txs', async (req, res) => {
       // encode transaction bytes, send it to tendermint node
-      let txBytes = '0x' + encodeTx(req.body, txCountNetwork).toString('hex')
+      let txBytes =
+        '0x' + encodeTx(req.body, txStats.txCountNetwork).toString('hex')
       let result = await axios.get(
         `http://localhost:${tendermintPort}/broadcast_tx_commit`,
         {
@@ -289,40 +227,6 @@ module.exports = function Lotion(opts = {}) {
       throw new Error('Tendermint node crashed')
     })
 
-    // start tendermint-facing abci server
-    let abciApp = new AbciApp()
-
-    abciApp.checkTx = function(req, cb) {
-      let rawTx = req.check_tx.tx.toBuffer()
-      let tx = decodeTx(rawTx)
-      let isValid = runTx(handler, appState, tx, false)
-      let code = isValid ? abci.CodeType.OK : abci.CodeType.EncodingError
-      cb({ code })
-    }
-
-    abciApp.deliverTx = function(req, cb) {
-      let rawTx = req.deliver_tx.tx.toBuffer()
-      let tx = decodeTx(rawTx)
-
-      let isValid = runTx(handler, appState, tx, true)
-      if (isValid) {
-        cb({ code: abci.CodeType.OK })
-        txCache.put(txCountNetwork, tx, (err, doc) => {})
-        txCountNetwork++
-      } else {
-        cb({ code: abci.CodeType.EncodingError })
-      }
-    }
-
-    abciApp.commit = function(req, cb) {
-      let sha256 = createHash('sha256')
-      // unless a merkle store is used, this will get slow when the state is big:
-      let appHash = sha256.update(JSON.stringify(appState), 'utf8').digest()
-      cb({ data: appHash })
-    }
-
-    let abciServer = new abci.Server(abciApp)
-    abciServer.server.listen(abciPort)
     app.listen(port)
 
     return genesisKey
