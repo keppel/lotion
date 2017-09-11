@@ -94,8 +94,19 @@ function downloadDat(dat) {
 }
 
 module.exports = function Lotion(opts = {}) {
-  let initialState = opts.initialState || {} // optional, can download from dat
   let tendermintPath = opts.path || './lotion-data'
+  let sharedDir = tendermintPath + '/shared'
+
+  let initialState = opts.initialState
+  if (!initialState) {
+    let stateFilePath = sharedDir + '/initial-state.json'
+    if (fs.existsSync(stateFilePath)) {
+      initialState = JSON.parse(fs.readFileSync(stateFilePath))
+    } else {
+      initialState = {}
+    }
+  }
+
   let store = opts.store
   let port = opts.port || 3001
   let peers = opts.peers || []
@@ -119,7 +130,6 @@ module.exports = function Lotion(opts = {}) {
     abciServer.listen(abciPort)
     await initNode(tendermintPath)
 
-    let sharedDir = tendermintPath + '/shared'
     if (typeof genesisKey === 'string') {
       // fetch initial state and validators from dat
       let dat = await Dat(sharedDir, { key: genesisKey })

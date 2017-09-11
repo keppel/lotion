@@ -1,6 +1,6 @@
 {
   "name": "lotion",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "preinstall": "node bin/download.js"
+    "install": "node bin/download.js"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
