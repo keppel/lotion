@@ -54,7 +54,6 @@ function getInitialPeers(peerSwarm) {
             peers.push(peerString)
             if (!gotFirstPeer) {
               gotFirstPeer = true
-              console.log(peerString)
               setTimeout(() => {
                 resolve(peers)
               }, 1000)
@@ -121,13 +120,6 @@ module.exports = function Lotion(opts = {}) {
     let genesisKey = opts.genesisKey
 
     let appState = Object.assign({}, initialState)
-    let abciServer = configureABCIServer(
-      stateMachine,
-      appState,
-      txCache,
-      txStats
-    )
-    abciServer.listen(abciPort)
     await initNode(tendermintPath)
 
     if (typeof genesisKey === 'string') {
@@ -140,6 +132,8 @@ module.exports = function Lotion(opts = {}) {
         sharedDir + '/initial-state.json',
         'utf8'
       )
+      appState = JSON.parse(initialStateJson)
+
       // if initial state provided, make sure it matches the one from the genesis key
       if (opts.initialState) {
         if (initialStateJson !== JSON.stringify(initialState)) {
@@ -160,6 +154,14 @@ module.exports = function Lotion(opts = {}) {
       dat.joinNetwork()
       genesisKey = dat.key.toString('hex')
     }
+
+    let abciServer = configureABCIServer(
+      stateMachine,
+      appState,
+      txCache,
+      txStats
+    )
+    abciServer.listen(abciPort)
 
     // start tx server
     let app = express()
