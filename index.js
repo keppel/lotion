@@ -5,6 +5,7 @@ let axios = require('axios')
 let { spawn } = require('child_process')
 let getPort = require('get-port')
 let tmBin = __dirname + '/bin/tendermint'
+let stringify = require('json-stable-stringify')
 let level = require('level')
 let memdown = require('memdown')
 let fs = require('fs')
@@ -136,7 +137,7 @@ module.exports = function Lotion(opts = {}) {
 
       // if initial state provided, make sure it matches the one from the genesis key
       if (opts.initialState) {
-        if (initialStateJson !== JSON.stringify(initialState)) {
+        if (initialStateJson !== stringify(initialState)) {
           throw new Error('genesis key does not match provided initial state')
         }
       }
@@ -147,7 +148,7 @@ module.exports = function Lotion(opts = {}) {
 
       await writeFile(
         sharedDir + '/initial-state.json',
-        JSON.stringify(initialState)
+        stringify(initialState)
       )
       await writeFile(sharedDir + '/tm-genesis.json', genesisJson)
       dat.importFiles()
