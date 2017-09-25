@@ -26,7 +26,7 @@
 <br>
 
 ```js
-let lotion = require('lotion')
+let lotion = require('lotion')(opts)
 
 let app = lotion((state, tx) => {
   state.count++
@@ -41,7 +41,7 @@ Under the hood, the [Tendermint](https://tendermint.com) consensus engine will k
 
 Lotion abstracts away as much of the complicated p2p and consensus logic as possible, exposing it via a simple REST API. This lets you focus on just designing the high-level blockchain logic for your app.
 
-*Note:* if you're securing any significant amount of value, please write your app with the heavily battle-tested [Cosmos SDK](https://github.com/tendermint/basecoin)
+*Note:* the security of Lotion has not yet been evaluated. If you're securing any significant amount of value, please write your app with [Cosmos SDK](https://github.com/tendermint/basecoin) instead.
 
 
 ## Usage
@@ -55,11 +55,9 @@ What's the simplest possible app we could make? Let's just count the number of t
 
 in `counter.js`:
 ```js
-let initialState = { count: 0 }
-
 let lotion = require('lotion')({
-  initialState,
-  port
+  initialState: { count: 0 },
+  port: 3000
 })
 
 lotion((state, tx) => {
@@ -98,7 +96,7 @@ woo!
 | name | description |
 |------|-------------|
 |[lotion-chat](https://github.com/keppel/lotion-chat) | basic chat on lotion |
-|[lotion-coin](https://github.com/keppel/lotion-chat) | cryptocurrency on lotion | 
+|[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
 
 
 
