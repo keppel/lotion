@@ -35,7 +35,7 @@ function initNode(tendermintPath) {
 
 function getInitialPeers(peerSwarm) {
   return new Promise((resolve, reject) => {
-    let peerTimeout = 4000
+    const PEER_TIMEOUT = 4000
     let peers = []
     let gotFirstPeer = false
     peerSwarm.on('connection', (conn, info) => {
@@ -68,7 +68,7 @@ function getInitialPeers(peerSwarm) {
       if (!gotFirstPeer) {
         resolve(peers)
       }
-    }, peerTimeout)
+    }, PEER_TIMEOUT)
   })
 }
 
@@ -241,6 +241,24 @@ module.exports = function Lotion(opts = {}) {
     })
 
     app.listen(port)
+
+    let waitForSync = new Promise((resolve, reject) => {
+      const SYNC_POLL_INTERVAL = 1000
+
+      let interval = setInterval(async () => {
+        let tmStatus = await axios
+          .get(`http://localhost:${tendermintPort}/status`)
+          .then(res => res.data.result)
+          .catch(e => {})
+
+        if (tmStatus && tmStatus.syncing === false) {
+          resolve()
+          clearInterval(interval)
+        }
+      }, SYNC_POLL_INTERVAL)
+    })
+
+    await waitForSync
 
     return genesisKey
   }
