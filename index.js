@@ -111,7 +111,7 @@ module.exports = function Lotion(opts = {}) {
   let port = opts.port || 3001
   let peers = opts.peers || []
 
-  return async function createServer(stateMachine) {
+  return async function createServer(txHandler) {
     let txCache = level({ db: memdown, valueEncoding: 'json' })
     let txStats = {
       txCountNetwork: 0
@@ -156,12 +156,7 @@ module.exports = function Lotion(opts = {}) {
       genesisKey = dat.key.toString('hex')
     }
 
-    let abciServer = configureABCIServer(
-      stateMachine,
-      appState,
-      txCache,
-      txStats
-    )
+    let abciServer = configureABCIServer(txHandler, appState, txCache, txStats)
     abciServer.listen(abciPort)
 
     // start tx server
