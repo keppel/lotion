@@ -1,13 +1,13 @@
 {
   "name": "lotion",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tape test/*.js",
     "install": "node bin/download.js"
   },
   "keywords": [],
@@ -26,10 +26,14 @@
     "memdown": "^1.2.4",
     "pkg": "^4.2.2",
     "protobufjs": "~5.0.1",
-    "rimraf": "^2.6.1",
     "sha.js": "^2.4.8",
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1",
     "webpack": "^3.5.4"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2",
+    "tape": "^4.8.0",
+    "tape-promise": "^2.0.1"
   }
 }
