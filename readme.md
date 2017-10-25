@@ -26,7 +26,7 @@
 <br>
 
 ```js
-let lotion = require('lotion')(opts)
+let lotion = require('lotion')
 let app = lotion({ initialState: { count: 0 }})
 
 app.use((state, tx) => {
