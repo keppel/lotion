@@ -26,11 +26,14 @@
 <br>
 
 ```js
-let lotion = require('lotion')(opts)
+let lotion = require('lotion')
+let app = lotion({ initialState: { count: 0 }})
 
-let app = lotion((state, tx) => {
+app.use((state, tx) => {
   state.count++
 })
+
+app.listen(3000)
 ```
 
 **Lotion** makes it super easy to write blockchain apps in JavaScript!
@@ -55,12 +58,13 @@ What's the simplest possible app we could make? Let's just count the number of t
 
 in `counter.js`:
 ```js
-let lotion = require('lotion')({
+let lotion = require('lotion')
+
+let app = lotion({
   initialState: { count: 0 },
-  port: 3000
 })
 
-lotion((state, tx) => {
+app.use((state, tx) => {
   state.count++
 })
 ```

@@ -15,10 +15,10 @@ function getState() {
 async function main() {
   // configure lotion app to test against
   let opts = {
-    port: 3000,
     initialState: { txCount: 0, blockCount: 0 }
   }
 
+  let app = lotion(opts)
   function txHandler(state, tx, chainInfo) {
     state.txCount++
   }
@@ -27,8 +27,9 @@ async function main() {
     state.blockCount++
     state.lastHeight = chainInfo.height
   }
-
-  let genesisKey = await lotion(opts)(txHandler, blockHandler)
+  app.use(txHandler)
+  app.useBlock(blockHandler)
+  await app.listen(3000)
   test('get initial state', async t => {
     let state = await getState()
 
