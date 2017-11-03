@@ -58,6 +58,11 @@ async function main() {
     t.ok(state.blockCount > 2)
     t.equal(state.blockCount, state.lastHeight)
   })
+
+  test('cleanup', t => {
+    t.end()
+    process.exit()
+  })
 }
 
 main()
