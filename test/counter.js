@@ -15,7 +15,8 @@ function getState() {
 async function main() {
   // configure lotion app to test against
   let opts = {
-    initialState: { txCount: 0, blockCount: 0 }
+    initialState: { txCount: 0, blockCount: 0 },
+    devMode: true
   }
 
   let app = lotion(opts)
@@ -58,10 +59,9 @@ async function main() {
     t.equal(state.blockCount, state.lastHeight)
   })
 
-  // clean up
-  test('clean up', t => {
+  test('cleanup', t => {
     t.end()
-    rimraf('./lotion-data', process.exit)
+    process.exit()
   })
 }
 

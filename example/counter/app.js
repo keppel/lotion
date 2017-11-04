@@ -1,15 +1,14 @@
 let initialState = { count: 0 }
 
-let port = 3001
-let lotion = require('../../')({
+let port = 3000
+let app = require('../../')({
   initialState,
-  port
+  devMode: true
 })
 
-let app = lotion((state, tx) => {
+app.use((state, tx) => {
   // validate tx, mutate state if it's valid.
   state.count++
-}).then(genesisKey => {
-  console.log(`server listening on port ${port}`)
-  console.log(`genesis: ${genesisKey}`)
 })
+
+app.listen(port)
