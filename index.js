@@ -29,6 +29,7 @@ module.exports = function Lotion(opts = {}) {
   let devMode = opts.devMode || false
   let txMiddleware = []
   let peeringPort = opts.p2pPort
+  let queryMiddleware = []
   let blockMiddleware = []
   let txEndpoints = []
   if (opts.lite) {
@@ -53,9 +54,11 @@ module.exports = function Lotion(opts = {}) {
       } else if (typeof middleware === 'function') {
         appMethods.useTx(middleware)
       } else if (middleware.type === 'tx') {
-        appMethods.useTx(middleware.middleware)
+        appMethods.useTx(middleware)
+      } else if (middleware.type === 'query') {
+        appMethods.useQuery(middleware)
       } else if (middleware.type === 'block') {
-        appMethods.useBlock(middleware.middleware)
+        appMethods.useBlock(middleware)
       } else if (middleware.type === 'tx-endpoint') {
         appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       }
@@ -70,12 +73,16 @@ module.exports = function Lotion(opts = {}) {
     useTxEndpoint: (path, txEndpoint) => {
       txEndpoints.push({ path: path.toLowerCase(), middleware: txEndpoint })
     },
+    useQuery: queryHandler => {
+      queryMiddleware.push(queryHandler)
+    },
     listen: async txServerPort => {
       const networkId =
         opts.networkId ||
         generateNetworkId(
           txMiddleware,
           blockMiddleware,
+          queryMiddleware,
           initialState,
           devMode,
           genesis
@@ -89,6 +96,7 @@ module.exports = function Lotion(opts = {}) {
       abciServer = ABCIServer({
         txMiddleware,
         blockMiddleware,
+        queryMiddleware,
         appState,
         txCache,
         txStats
