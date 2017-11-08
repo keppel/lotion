@@ -22,6 +22,9 @@ async function main() {
   let app = lotion(opts)
   function txHandler(state, tx, chainInfo) {
     state.txCount++
+    if (tx.shouldError === true) {
+      throw new Error('this transaction should cause an error')
+    }
   }
 
   function blockHandler(state, chainInfo) {
@@ -57,6 +60,22 @@ async function main() {
     let state = await getState()
     t.ok(state.blockCount > 2)
     t.equal(state.blockCount, state.lastHeight)
+  })
+
+  test('tendermint node proxy', async t => {
+    let result = await axios.get('http://localhost:3000/tendermint/status')
+    t.equal(typeof result.data.result.node_info, 'object')
+  })
+
+  test('error handling', async t => {
+    let result = await axios.post('http://localhost:3000/txs', {
+      shouldError: true
+    })
+    t.equal(result.data.result.check_tx.code, 2)
+    t.equal(
+      result.data.result.check_tx.log,
+      'Error: this transaction should cause an error'
+    )
   })
 
   test('cleanup', t => {
