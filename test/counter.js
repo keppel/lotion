@@ -59,6 +59,11 @@ async function main() {
     t.equal(state.blockCount, state.lastHeight)
   })
 
+  test('tendermint node proxy', async t => {
+    let result = await axios.get('http://localhost:3000/tendermint/status')
+    t.equal(typeof result.data.result.node_info, 'object')
+  })
+
   test('cleanup', t => {
     t.end()
     process.exit()
