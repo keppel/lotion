@@ -19,6 +19,7 @@
     "browserify": "^14.4.0",
     "dat-node": "^3.5.1",
     "express": "^4.15.4",
+    "express-http-proxy": "^1.0.7",
     "get-port": "^3.1.0",
     "js-wire": "~0.0.3",
     "json-stable-stringify": "^1.0.1",
