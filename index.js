@@ -37,11 +37,13 @@ module.exports = function Lotion(opts = {}) {
       if (middleware instanceof Array) {
         middleware.forEach(appMethods.use)
       } else if (typeof middleware === 'function') {
-        appMethods.useTx(middleware)
+        appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'tx') {
-        appMethods.useTx(middleware)
+        appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'block') {
-        appMethods.useBlock(middleware)
+        appMethods.useBlock(middleware.middleware)
+      } else if (middleware.type === 'tx-endpoint') {
+        appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       }
       return appMethods
     },
@@ -50,6 +52,9 @@ module.exports = function Lotion(opts = {}) {
     },
     useBlock: blockHandler => {
       blockMiddleware.push(blockHandler)
+    },
+    useTxEndpoint: (path, txEndpoint) => {
+      txEndpoints.push({ path, txEndpoint })
     },
     listen: async txServerPort => {
       const networkId =
@@ -91,7 +96,13 @@ module.exports = function Lotion(opts = {}) {
         genesis
       })
 
-      let txServer = TxServer({ tendermintPort, appState, txCache, txStats })
+      let txServer = TxServer({
+        tendermintPort,
+        appState,
+        txEndpoints,
+        txCache,
+        txStats
+      })
       txServer.listen(txServerPort)
     }
   }
