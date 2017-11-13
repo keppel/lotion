@@ -15,7 +15,7 @@ function getState() {
 async function main() {
   // configure lotion app to test against
   let opts = {
-    initialState: { txCount: 0, blockCount: 0 },
+    initialState: { txCount: 0, blockCount: 0, specialTxCount: 0 },
     devMode: true
   }
 
@@ -25,14 +25,21 @@ async function main() {
     if (tx.shouldError === true) {
       throw new Error('this transaction should cause an error')
     }
+    if (tx.isSpecial) {
+      state.specialTxCount++
+    }
   }
 
   function blockHandler(state, chainInfo) {
     state.blockCount++
     state.lastHeight = chainInfo.height
   }
+  function txEndpoint(tx, nodeInfo) {
+    return Object.assign({}, tx, { isSpecial: true })
+  }
   app.use(txHandler)
   app.useBlock(blockHandler)
+  app.useTxEndpoint('/special', txEndpoint)
   await app.listen(3000)
   test('get initial state', async t => {
     let state = await getState()
@@ -78,6 +85,10 @@ async function main() {
     )
   })
 
+  test('custom endpoint', async t => {
+    let result = await axios.post('http://localhost:3000/txs/special', {})
+    t.equal(result.data.state.specialTxCount, 1)
+  })
   test('cleanup', t => {
     t.end()
     process.exit()
