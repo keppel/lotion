@@ -114,6 +114,11 @@ async function main() {
     t.equal(result.data.state.accounts.foo.otherBalance, 60)
   })
 
+  test('node info endpoint', async t => {
+    let result = await axios.get('http://localhost:3000/info')
+    t.equal(result.data.pubKey.length, 64)
+  })
+
   test('cleanup', t => {
     t.end()
     process.exit()
