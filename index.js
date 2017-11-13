@@ -26,6 +26,7 @@ module.exports = function Lotion(opts = {}) {
   let devMode = opts.devMode || false
   let txMiddleware = []
   let blockMiddleware = []
+  let txEndpoints = []
   let genesis =
     opts.genesis && fs.readFileSync(opts.genesis, { encoding: 'utf8' })
   let appState = Object.assign({}, initialState)
@@ -37,7 +38,7 @@ module.exports = function Lotion(opts = {}) {
       if (middleware instanceof Array) {
         middleware.forEach(appMethods.use)
       } else if (typeof middleware === 'function') {
-        appMethods.useTx(middleware.middleware)
+        appMethods.useTx(middleware)
       } else if (middleware.type === 'tx') {
         appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'block') {
@@ -54,7 +55,7 @@ module.exports = function Lotion(opts = {}) {
       blockMiddleware.push(blockHandler)
     },
     useTxEndpoint: (path, txEndpoint) => {
-      txEndpoints.push({ path, txEndpoint })
+      txEndpoints.push({ path: path.toLowerCase(), middleware: txEndpoint })
     },
     listen: async txServerPort => {
       const networkId =
@@ -101,7 +102,8 @@ module.exports = function Lotion(opts = {}) {
         appState,
         txEndpoints,
         txCache,
-        txStats
+        txStats,
+        port: txServerPort
       })
       txServer.listen(txServerPort)
     }
