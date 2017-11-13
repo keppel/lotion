@@ -7,6 +7,7 @@ let TxServer = require('./lib/tx-server.js')
 let Tendermint = require('./lib/tendermint.js')
 let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
+let getNodeInfo = require('./lib/node-info.js')
 let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -97,9 +98,11 @@ module.exports = function Lotion(opts = {}) {
         genesis
       })
 
+      let nodeInfo = await getNodeInfo(lotionPath)
       let txServer = TxServer({
         tendermintPort,
         appState,
+        nodeInfo,
         txEndpoints,
         txCache,
         txStats,
