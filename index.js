@@ -7,6 +7,7 @@ let TxServer = require('./lib/tx-server.js')
 let Tendermint = require('./lib/tendermint.js')
 let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
+let getNodeInfo = require('./lib/node-info.js')
 let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -26,6 +27,7 @@ module.exports = function Lotion(opts = {}) {
   let devMode = opts.devMode || false
   let txMiddleware = []
   let blockMiddleware = []
+  let txEndpoints = []
   let genesis =
     opts.genesis && fs.readFileSync(opts.genesis, { encoding: 'utf8' })
   let appState = Object.assign({}, initialState)
@@ -39,9 +41,11 @@ module.exports = function Lotion(opts = {}) {
       } else if (typeof middleware === 'function') {
         appMethods.useTx(middleware)
       } else if (middleware.type === 'tx') {
-        appMethods.useTx(middleware)
+        appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'block') {
-        appMethods.useBlock(middleware)
+        appMethods.useBlock(middleware.middleware)
+      } else if (middleware.type === 'tx-endpoint') {
+        appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       }
       return appMethods
     },
@@ -50,6 +54,9 @@ module.exports = function Lotion(opts = {}) {
     },
     useBlock: blockHandler => {
       blockMiddleware.push(blockHandler)
+    },
+    useTxEndpoint: (path, txEndpoint) => {
+      txEndpoints.push({ path: path.toLowerCase(), middleware: txEndpoint })
     },
     listen: async txServerPort => {
       const networkId =
@@ -91,7 +98,16 @@ module.exports = function Lotion(opts = {}) {
         genesis
       })
 
-      let txServer = TxServer({ tendermintPort, appState, txCache, txStats })
+      let nodeInfo = await getNodeInfo(lotionPath)
+      let txServer = TxServer({
+        tendermintPort,
+        appState,
+        nodeInfo,
+        txEndpoints,
+        txCache,
+        txStats,
+        port: txServerPort
+      })
       txServer.listen(txServerPort)
     }
   }
