@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "test": "tape test/*.js",
+    "test": "nyc tape test/json.js test/counter.js",
     "install": "node bin/download.js"
   },
   "keywords": [],
@@ -33,6 +33,7 @@
     "webpack": "^3.5.4"
   },
   "devDependencies": {
+    "nyc": "^11.3.0",
     "rimraf": "^2.6.2",
     "tape": "^4.8.0",
     "tape-promise": "^2.0.1"
