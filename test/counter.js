@@ -120,8 +120,8 @@ async function main() {
   })
 
   test('cleanup', t => {
+    app.close()
     t.end()
-    process.exit()
   })
 }
 
