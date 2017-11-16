@@ -33,6 +33,9 @@ module.exports = function Lotion(opts = {}) {
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
+  let abciServer
+  let tendermint
+  let txHTTPServer
 
   let appMethods = {
     use: middleware => {
@@ -71,7 +74,7 @@ module.exports = function Lotion(opts = {}) {
       // set up abci server, then tendermint node, then tx server
       let { tendermintPort, abciPort, p2pPort } = await getPorts()
 
-      let abciServer = ABCIServer({
+      abciServer = ABCIServer({
         txMiddleware,
         blockMiddleware,
         appState,
@@ -88,7 +91,7 @@ module.exports = function Lotion(opts = {}) {
           process.exit()
         })
       }
-      let tendermint = await Tendermint({
+      tendermint = await Tendermint({
         lotionPath,
         tendermintPort,
         abciPort,
@@ -108,7 +111,12 @@ module.exports = function Lotion(opts = {}) {
         txStats,
         port: txServerPort
       })
-      txServer.listen(txServerPort)
+      txHTTPServer = txServer.listen(txServerPort)
+    },
+    close: () => {
+      abciServer.close()
+      tendermint.close()
+      txHTTPServer.close()
     }
   }
 
