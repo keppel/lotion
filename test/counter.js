@@ -12,6 +12,8 @@ function getState() {
   return axios.get('http://localhost:3000/state').then(res => res.data)
 }
 
+let app
+
 test('setup', async t => {
   // configure lotion app to test against
   let opts = {
@@ -19,7 +21,7 @@ test('setup', async t => {
     devMode: true
   }
 
-  let app = lotion(opts)
+  app = lotion(opts)
   function txHandler(state, tx, chainInfo) {
     state.txCount++
     if (tx.shouldError === true) {
