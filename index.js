@@ -98,6 +98,7 @@ module.exports = function Lotion(opts = {}) {
         abciPort,
         p2pPort,
         logTendermint,
+        networkId,
         peers,
         genesis
       })
