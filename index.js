@@ -83,8 +83,9 @@ module.exports = function Lotion(opts = {}) {
       })
       abciServer.listen(abciPort)
 
-      const lotionPath = LOTION_HOME + '/networks/' + networkId
+      let lotionPath = LOTION_HOME + '/networks/' + networkId
       if (devMode) {
+        lotionPath += Math.floor(Math.random() * 1e9)
         rimraf.sync(lotionPath)
         process.on('SIGINT', () => {
           rimraf.sync(lotionPath)
