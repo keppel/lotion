@@ -130,7 +130,6 @@ test('node info endpoint', async t => {
 })
 
 test('cleanup', t => {
+  app.close()
   t.end()
-  // TODO: gracefully shutdown lotion node
-  process.exit()
 })
