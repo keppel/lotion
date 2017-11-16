@@ -27,7 +27,6 @@
     "memdown": "^1.2.4",
     "pkg": "^4.2.2",
     "protobufjs": "~5.0.1",
-    "sha.js": "^2.4.8",
     "tendermint-keys": "^2.0.2",
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1",
