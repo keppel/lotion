@@ -1,4 +1,4 @@
-let test = require('tape-promise/tape')
+let test = require('tape')
 let json = require('../lib/json.js')
 
 test('stringify', (t) => {
