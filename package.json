@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "test": "nyc tape test/*.js",
+    "test": "nyc tape test/json.js test/counter.js",
     "install": "node bin/download.js"
   },
   "keywords": [],
