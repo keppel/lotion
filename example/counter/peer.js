@@ -1,10 +1,10 @@
 let initialState = { count: 0 }
 
-let port = 3000
+let port = 3001
 let app = require('../../')({
   initialState,
   genesis: 'genesis.json',
-  keys: 'keys.json',
+  keys: 'keys2.json',
   logTendermint: true,
   devMode: true
 })

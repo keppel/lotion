@@ -12,14 +12,16 @@ function getState() {
   return axios.get('http://localhost:3000/state').then(res => res.data)
 }
 
-async function main() {
+let app
+
+test('setup', async t => {
   // configure lotion app to test against
   let opts = {
     initialState: { txCount: 0, blockCount: 0, specialTxCount: 0 },
     devMode: true
   }
 
-  let app = lotion(opts)
+  app = lotion(opts)
   function txHandler(state, tx, chainInfo) {
     state.txCount++
     if (tx.shouldError === true) {
@@ -53,76 +55,83 @@ async function main() {
   app.useTxEndpoint('/special', txEndpoint)
 
   await app.listen(3000)
-  test('get initial state', async t => {
-    let state = await getState()
 
-    t.equal(state.txCount, 0)
-    t.end()
+  t.end()
+})
+
+test('get initial state', async t => {
+  let state = await getState()
+
+  t.equal(state.txCount, 0)
+  t.end()
+})
+
+test('send a tx', async t => {
+  let result = await axios
+    .post('http://localhost:3000/txs', {})
+    .then(res => res.data.result)
+
+  t.equal(result.check_tx.code, 0, 'no check_tx error code')
+  t.equal(result.deliver_tx.code, 0, 'no deliver_tx error code')
+
+  // fetch state again
+  let state = await getState()
+  t.equal(state.txCount, 1, 'txCount should have incremented')
+  t.end()
+})
+
+test('block handler should attach block height to state', async t => {
+  await delay(3000)
+  let state = await getState()
+  t.ok(state.blockCount > 2)
+  t.equal(state.blockCount, state.lastHeight)
+  t.end()
+})
+
+test('tendermint node proxy', async t => {
+  let result = await axios.get('http://localhost:3000/tendermint/status')
+  t.equal(typeof result.data.result.node_info, 'object')
+  t.end()
+})
+
+test('error handling', async t => {
+  let result = await axios.post('http://localhost:3000/txs', {
+    shouldError: true
   })
+  t.equal(result.data.result.check_tx.code, 2)
+  t.equal(
+    result.data.result.check_tx.log,
+    'Error: this transaction should cause an error'
+  )
+  t.end()
+})
 
-  test('send a tx', async t => {
-    let result = await axios
-      .post('http://localhost:3000/txs', {})
-      .then(res => res.data.result)
+test('custom endpoint', async t => {
+  let result = await axios.post('http://localhost:3000/txs/special', {})
+  t.equal(result.data.state.specialTxCount, 1)
+  t.end()
+})
 
-    t.equal(result.check_tx.code, 0, 'no check_tx error code')
-    t.equal(result.deliver_tx.code, 0, 'no deliver_tx error code')
-
-    // fetch state again
-    let state = await getState()
-    t.equal(state.txCount, 1, 'txCount should have incremented')
-    t.end()
+test('deeply nested state mutations', async t => {
+  let result = await axios.post('http://localhost:3000/txs', {
+    mutateDeep: true
   })
-
-  test('block handler should attach block height to state', async t => {
-    await delay(3000)
-    let state = await getState()
-    t.ok(state.blockCount > 2)
-    t.equal(state.blockCount, state.lastHeight)
+  t.equal(result.data.state.accounts.foo.balance, 40)
+  t.equal(result.data.state.accounts.foo.otherBalance, undefined)
+  result = await axios.post('http://localhost:3000/txs', {
+    mutateDeep: true
   })
+  t.equal(result.data.state.accounts.foo.otherBalance, 60)
+  t.end()
+})
 
-  test('tendermint node proxy', async t => {
-    let result = await axios.get('http://localhost:3000/tendermint/status')
-    t.equal(typeof result.data.result.node_info, 'object')
-  })
+test('node info endpoint', async t => {
+  let result = await axios.get('http://localhost:3000/info')
+  t.equal(result.data.pubKey.length, 64)
+  t.end()
+})
 
-  test('error handling', async t => {
-    let result = await axios.post('http://localhost:3000/txs', {
-      shouldError: true
-    })
-    t.equal(result.data.result.check_tx.code, 2)
-    t.equal(
-      result.data.result.check_tx.log,
-      'Error: this transaction should cause an error'
-    )
-  })
-
-  test('custom endpoint', async t => {
-    let result = await axios.post('http://localhost:3000/txs/special', {})
-    t.equal(result.data.state.specialTxCount, 1)
-  })
-
-  test('deeply nested state mutations', async t => {
-    let result = await axios.post('http://localhost:3000/txs', {
-      mutateDeep: true
-    })
-    t.equal(result.data.state.accounts.foo.balance, 40)
-    t.equal(result.data.state.accounts.foo.otherBalance, undefined)
-    result = await axios.post('http://localhost:3000/txs', {
-      mutateDeep: true
-    })
-    t.equal(result.data.state.accounts.foo.otherBalance, 60)
-  })
-
-  test('node info endpoint', async t => {
-    let result = await axios.get('http://localhost:3000/info')
-    t.equal(result.data.pubKey.length, 64)
-  })
-
-  test('cleanup', t => {
-    t.end()
-    process.exit()
-  })
-}
-
-main()
+test('cleanup', t => {
+  app.close()
+  t.end()
+})

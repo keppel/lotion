@@ -12,8 +12,8 @@ let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
-async function getPorts() {
-  let p2pPort = await getPort()
+async function getPorts(peeringPort) {
+  let p2pPort = peeringPort || (await getPort(peeringPort))
   let tendermintPort = await getPort()
   let abciPort = await getPort()
 
@@ -26,13 +26,20 @@ module.exports = function Lotion(opts = {}) {
   let logTendermint = opts.logTendermint || false
   let devMode = opts.devMode || false
   let txMiddleware = []
+  let peeringPort = opts.p2pPort
   let blockMiddleware = []
   let txEndpoints = []
+  let keys =
+    typeof opts.keys === 'string' &&
+    JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
   let genesis =
     opts.genesis && fs.readFileSync(opts.genesis, { encoding: 'utf8' })
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
+  let abciServer
+  let tendermint
+  let txHTTPServer
 
   let appMethods = {
     use: middleware => {
@@ -69,9 +76,9 @@ module.exports = function Lotion(opts = {}) {
           genesis
         )
       // set up abci server, then tendermint node, then tx server
-      let { tendermintPort, abciPort, p2pPort } = await getPorts()
+      let { tendermintPort, abciPort, p2pPort } = await getPorts(peeringPort)
 
-      let abciServer = ABCIServer({
+      abciServer = ABCIServer({
         txMiddleware,
         blockMiddleware,
         appState,
@@ -80,22 +87,25 @@ module.exports = function Lotion(opts = {}) {
       })
       abciServer.listen(abciPort)
 
-      const lotionPath = LOTION_HOME + '/networks/' + networkId
+      let lotionPath = LOTION_HOME + '/networks/' + networkId
       if (devMode) {
+        lotionPath += Math.floor(Math.random() * 1e9)
         rimraf.sync(lotionPath)
         process.on('SIGINT', () => {
           rimraf.sync(lotionPath)
           process.exit()
         })
       }
-      let tendermint = await Tendermint({
+      tendermint = await Tendermint({
         lotionPath,
         tendermintPort,
         abciPort,
         p2pPort,
         logTendermint,
+        networkId,
         peers,
-        genesis
+        genesis,
+        keys
       })
 
       let nodeInfo = await getNodeInfo(lotionPath)
@@ -108,7 +118,12 @@ module.exports = function Lotion(opts = {}) {
         txStats,
         port: txServerPort
       })
-      txServer.listen(txServerPort)
+      txHTTPServer = txServer.listen(txServerPort)
+    },
+    close: () => {
+      abciServer.close()
+      tendermint.close()
+      txHTTPServer.close()
     }
   }
 
