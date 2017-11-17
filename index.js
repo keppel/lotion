@@ -28,6 +28,9 @@ module.exports = function Lotion(opts = {}) {
   let txMiddleware = []
   let blockMiddleware = []
   let txEndpoints = []
+  let keys =
+    typeof opts.keys === 'string' &&
+    JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
   let genesis =
     opts.genesis && fs.readFileSync(opts.genesis, { encoding: 'utf8' })
   let appState = Object.assign({}, initialState)
@@ -100,7 +103,8 @@ module.exports = function Lotion(opts = {}) {
         logTendermint,
         networkId,
         peers,
-        genesis
+        genesis,
+        keys
       })
 
       let nodeInfo = await getNodeInfo(lotionPath)
