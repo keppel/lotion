@@ -12,8 +12,8 @@ let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
-async function getPorts() {
-  let p2pPort = await getPort()
+async function getPorts(peeringPort) {
+  let p2pPort = peeringPort || (await getPort(peeringPort))
   let tendermintPort = await getPort()
   let abciPort = await getPort()
 
@@ -26,6 +26,7 @@ module.exports = function Lotion(opts = {}) {
   let logTendermint = opts.logTendermint || false
   let devMode = opts.devMode || false
   let txMiddleware = []
+  let peeringPort = opts.p2pPort
   let blockMiddleware = []
   let txEndpoints = []
   let keys =
@@ -75,7 +76,7 @@ module.exports = function Lotion(opts = {}) {
           genesis
         )
       // set up abci server, then tendermint node, then tx server
-      let { tendermintPort, abciPort, p2pPort } = await getPorts()
+      let { tendermintPort, abciPort, p2pPort } = await getPorts(peeringPort)
 
       abciServer = ABCIServer({
         txMiddleware,
