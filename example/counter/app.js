@@ -5,7 +5,8 @@ let app = require('../../')({
   initialState,
   genesis: 'genesis.json',
   keys: 'keys.json',
-  logTendermint: true,
+  peers: ['localhost:46660'],
+  p2pPort: 46661,
   devMode: true
 })
 
