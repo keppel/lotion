@@ -52,13 +52,13 @@ module.exports = function Lotion(opts = {}) {
       if (middleware instanceof Array) {
         middleware.forEach(appMethods.use)
       } else if (typeof middleware === 'function') {
-        appMethods.useTx(middleware)
+        appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'tx') {
-        appMethods.useTx(middleware)
+        appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'query') {
-        appMethods.useQuery(middleware)
+        appMethods.useQuery(middleware.middleware)
       } else if (middleware.type === 'block') {
-        appMethods.useBlock(middleware)
+        appMethods.useBlock(middleware.middleware)
       } else if (middleware.type === 'tx-endpoint') {
         appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       }
