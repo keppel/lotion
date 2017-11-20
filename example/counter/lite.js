@@ -1,14 +1,14 @@
 let initialState = { count: 0 }
 
-let port = 3000
+let port = 3002
 let app = require('../../')({
   initialState,
   genesis: 'genesis.json',
   keys: 'keys.json',
   logTendermint: true,
-  peers: ['localhost:46660'],
-  tendermintPort: 46657,
-  p2pPort: 46661,
+  target: 'localhost:46657',
+  p2pPort: 46662,
+  lite: true,
   devMode: true
 })
 
