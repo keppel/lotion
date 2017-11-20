@@ -52,7 +52,7 @@ module.exports = function Lotion(opts = {}) {
       if (middleware instanceof Array) {
         middleware.forEach(appMethods.use)
       } else if (typeof middleware === 'function') {
-        appMethods.useTx(middleware.middleware)
+        appMethods.useTx(middleware)
       } else if (middleware.type === 'tx') {
         appMethods.useTx(middleware.middleware)
       } else if (middleware.type === 'query') {
