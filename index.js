@@ -9,6 +9,7 @@ let TendermintLite = require('./lib/tendermint-lite.js')
 let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
+let getRoot = require('./lib/get-root.js')
 let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -39,10 +40,12 @@ module.exports = function Lotion(opts = {}) {
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
   let genesis =
-    opts.genesis && fs.readFileSync(opts.genesis, { encoding: 'utf8' })
+    opts.genesis &&
+    JSON.parse(fs.readFileSync(opts.genesis, { encoding: 'utf8' }))
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
+  let initialAppHash = getRoot(appState).toString('hex')
   let abciServer
   let tendermint
   let txHTTPServer
@@ -99,7 +102,8 @@ module.exports = function Lotion(opts = {}) {
         queryMiddleware,
         appState,
         txCache,
-        txStats
+        txStats,
+        initialAppHash
       })
       abciServer.listen(abciPort)
 
@@ -122,7 +126,8 @@ module.exports = function Lotion(opts = {}) {
         peers,
         genesis,
         target,
-        keys
+        keys,
+        initialAppHash
       })
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
