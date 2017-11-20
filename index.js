@@ -5,6 +5,7 @@ let level = require('level')
 let ABCIServer = require('./lib/abci-app.js')
 let TxServer = require('./lib/tx-server.js')
 let Tendermint = require('./lib/tendermint.js')
+let TendermintLite = require('./lib/tendermint-lite.js')
 let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
@@ -24,11 +25,15 @@ module.exports = function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
+  let target = opts.target
   let devMode = opts.devMode || false
   let txMiddleware = []
   let peeringPort = opts.p2pPort
   let blockMiddleware = []
   let txEndpoints = []
+  if (opts.lite) {
+    Tendermint = TendermintLite
+  }
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
@@ -76,7 +81,10 @@ module.exports = function Lotion(opts = {}) {
           genesis
         )
       // set up abci server, then tendermint node, then tx server
-      let { tendermintPort, abciPort, p2pPort } = await getPorts(peeringPort)
+      let { tendermintPort, abciPort, p2pPort } = await getPorts(
+        peeringPort,
+        opts.tendermintPort
+      )
 
       abciServer = ABCIServer({
         txMiddleware,
@@ -105,10 +113,11 @@ module.exports = function Lotion(opts = {}) {
         networkId,
         peers,
         genesis,
+        target,
         keys
       })
 
-      let nodeInfo = await getNodeInfo(lotionPath)
+      let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
       let txServer = TxServer({
         tendermintPort,
         appState,
