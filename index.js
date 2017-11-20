@@ -12,9 +12,9 @@ let os = require('os')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
-async function getPorts(peeringPort) {
+async function getPorts(peeringPort, rpcPort) {
   let p2pPort = peeringPort || (await getPort(peeringPort))
-  let tendermintPort = await getPort()
+  let tendermintPort = rpcPort || (await getPort(rpcPort))
   let abciPort = await getPort()
 
   return { tendermintPort, abciPort, p2pPort }
