@@ -1,5 +1,9 @@
-module.exports = {
-  darwin: 'https://s3-us-west-2.amazonaws.com/tendermint/binaries/tendermint/v0.10.3/tendermint_0.10.3_darwin_amd64.zip',
-  win32: 'https://s3-us-west-2.amazonaws.com/tendermint/binaries/tendermint/v0.10.3/tendermint_0.10.3_windows_amd64.zip',
-  linux: 'https://s3-us-west-2.amazonaws.com/tendermint/binaries/tendermint/v0.10.3/tendermint_0.10.3_linux_amd64.zip'
+exports.tendermint = {
+  darwin: 'https://github.com/tendermint/tendermint/releases/download/v0.11.0/tendermint_0.11.0_darwin_amd64.zip',
+  win32: 'https://github.com/tendermint/tendermint/releases/download/v0.11.0/tendermint_0.11.0_windows_amd64.zip',
+  linux: 'https://github.com/tendermint/tendermint/releases/download/v0.11.0/tendermint_0.11.0_linux_amd64.zip'
+}
+
+exports.basecli = {
+  darwin: 'https://tendermint.nyc3.digitaloceanspaces.com/basecli-darwin-v0.7.0'
 }

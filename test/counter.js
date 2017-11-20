@@ -18,7 +18,8 @@ test('setup', async t => {
   // configure lotion app to test against
   let opts = {
     initialState: { txCount: 0, blockCount: 0, specialTxCount: 0 },
-    devMode: true
+    devMode: true,
+    logTendermint: false
   }
 
   app = lotion(opts)
@@ -43,7 +44,7 @@ test('setup', async t => {
 
   function blockHandler(state, chainInfo) {
     state.blockCount++
-    state.lastHeight = chainInfo.height
+    state.lastHeight = chainInfo.height - 1
   }
 
   function txEndpoint(tx, nodeInfo) {
