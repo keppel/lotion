@@ -31,6 +31,7 @@ module.exports = function Lotion(opts = {}) {
   let txMiddleware = []
   let peeringPort = opts.p2pPort
   let queryMiddleware = []
+  let initializerMiddleware = []
   let blockMiddleware = []
   let txEndpoints = []
   if (opts.lite) {
@@ -45,7 +46,6 @@ module.exports = function Lotion(opts = {}) {
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
-  let initialAppHash = getRoot(appState).toString('hex')
   let abciServer
   let tendermint
   let txHTTPServer
@@ -62,6 +62,8 @@ module.exports = function Lotion(opts = {}) {
         appMethods.useQuery(middleware.middleware)
       } else if (middleware.type === 'block') {
         appMethods.useBlock(middleware.middleware)
+      } else if (middleware.type === 'initializer') {
+        appMethods.useInitializer(middleware.middleware)
       } else if (middleware.type === 'tx-endpoint') {
         appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       }
@@ -79,6 +81,9 @@ module.exports = function Lotion(opts = {}) {
     useQuery: queryHandler => {
       queryMiddleware.push(queryHandler)
     },
+    useInitializer: initializer => {
+      initializerMiddleware.push(initializer)
+    },
     listen: async txServerPort => {
       const networkId =
         opts.networkId ||
@@ -86,6 +91,7 @@ module.exports = function Lotion(opts = {}) {
           txMiddleware,
           blockMiddleware,
           queryMiddleware,
+          initializerMiddleware,
           initialState,
           devMode,
           genesis
@@ -96,10 +102,15 @@ module.exports = function Lotion(opts = {}) {
         opts.tendermintPort
       )
 
+      initializerMiddleware.forEach(initializer => {
+        initializer(appState)
+      })
+      let initialAppHash = getRoot(appState).toString('hex')
       abciServer = ABCIServer({
         txMiddleware,
         blockMiddleware,
         queryMiddleware,
+        initializerMiddleware,
         appState,
         txCache,
         txStats,
