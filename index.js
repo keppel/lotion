@@ -11,6 +11,7 @@ let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
 let os = require('os')
+let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
@@ -33,6 +34,7 @@ module.exports = function Lotion(opts = {}) {
   let queryMiddleware = []
   let initializerMiddleware = []
   let blockMiddleware = []
+  let postListenMiddleware = []
   let txEndpoints = []
   if (opts.lite) {
     Tendermint = TendermintLite
@@ -46,9 +48,17 @@ module.exports = function Lotion(opts = {}) {
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
+  let app = {}
+  let bus = new EventEmitter()
   let abciServer
   let tendermint
   let txHTTPServer
+
+  bus.on('listen', () => {
+    postListenMiddleware.forEach(f => {
+      f(app)
+    })
+  })
 
   let appMethods = {
     use: middleware => {
@@ -66,6 +76,8 @@ module.exports = function Lotion(opts = {}) {
         appMethods.useInitializer(middleware.middleware)
       } else if (middleware.type === 'tx-endpoint') {
         appMethods.useTxEndpoint(middleware.path, middleware.middleware)
+      } else if (middleware.type === 'post-listen') {
+        appMethods.usePostListen(middleware.middleware)
       }
       return appMethods
     },
@@ -83,6 +95,10 @@ module.exports = function Lotion(opts = {}) {
     },
     useInitializer: initializer => {
       initializerMiddleware.push(initializer)
+    },
+    usePostListen: postListener => {
+      // TODO: rename "post listen", there's probably a more descriptive name.
+      postListenMiddleware.push(postListener)
     },
     listen: async txServerPort => {
       const networkId =
@@ -152,6 +168,7 @@ module.exports = function Lotion(opts = {}) {
         port: txServerPort
       })
       txHTTPServer = txServer.listen(txServerPort)
+      bus.emit('listen')
     },
     close: () => {
       abciServer.close()
