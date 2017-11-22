@@ -1,0 +1,47 @@
+{
+  "projectName": "lotion",
+  "projectOwner": "keppel",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "keppel",
+      "name": "Judd",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1269291?v=4",
+      "profile": "https://twitter.com/juddkeppel",
+      "contributions": [
+        "code",
+        "doc",
+        "ideas",
+        "test",
+        "review",
+        "example"
+      ]
+    },
+    {
+      "login": "mappum",
+      "name": "Matt Bell",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/398285?v=4",
+      "profile": "https://github.com/mappum",
+      "contributions": [
+        "code",
+        "ideas",
+        "test",
+        "plugin",
+        "review"
+      ]
+    },
+    {
+      "login": "jolesbi",
+      "name": "Jordan Bibla",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6021933?v=4",
+      "profile": "http://www.jordanbibla.com",
+      "contributions": [
+        "design"
+      ]
+    }
+  ]
+}
