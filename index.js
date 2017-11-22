@@ -23,12 +23,17 @@ async function getPorts(peeringPort, rpcPort) {
   return { tendermintPort, abciPort, p2pPort }
 }
 
+function getGenesis(genesisPath) {
+  return JSON.parse(fs.readFileSync(genesisPath, { encoding: 'utf8' }))
+}
+
 module.exports = function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
   let target = opts.target
   let devMode = opts.devMode || false
+  let lite = opts.lite || false
   let txMiddleware = []
   let peeringPort = opts.p2pPort
   let queryMiddleware = []
@@ -36,27 +41,26 @@ module.exports = function Lotion(opts = {}) {
   let blockMiddleware = []
   let postListenMiddleware = []
   let txEndpoints = []
-  if (opts.lite) {
+  if (lite) {
     Tendermint = TendermintLite
   }
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-  let genesis =
-    opts.genesis &&
-    JSON.parse(fs.readFileSync(opts.genesis, { encoding: 'utf8' }))
+  let genesis = opts.genesis && getGenesis(opts.genesis)
+
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
-  let app = {}
   let bus = new EventEmitter()
+  let appInfo
   let abciServer
   let tendermint
   let txHTTPServer
 
   bus.on('listen', () => {
     postListenMiddleware.forEach(f => {
-      f(app)
+      f(appInfo)
     })
   })
 
@@ -168,6 +172,17 @@ module.exports = function Lotion(opts = {}) {
         port: txServerPort
       })
       txHTTPServer = txServer.listen(txServerPort)
+
+      // add some references to useful variables to app object.
+      appInfo = {
+        tendermintPort,
+        abciPort,
+        txServerPort,
+        p2pPort,
+        genesis: getGenesis(lotionPath + '/genesis.json'),
+        lite
+      }
+
       bus.emit('listen')
     },
     close: () => {
