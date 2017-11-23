@@ -2,7 +2,7 @@
   <br>
   <a href="https://github.com/keppel/lotion"><img src="https://user-images.githubusercontent.com/1269291/33154609-741d0d46-cfb7-11e7-9381-ac82418e8fdc.jpg" alt="Lotion" width="200"></a>
   <br>
-      Lotion
+      ✨ Lotion ✨
   <br>
   <br>
 </h1>
@@ -81,7 +81,7 @@ Every user who runs your Lotion app will interact with the same blockchain. Anyo
 
 A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction `tx`. Both are just objects.
 
-All of this cosmic witchcraft is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
+This cosmic wizardry is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
 
 <p align="center">
   <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200" /></a>
@@ -113,7 +113,7 @@ The __transaction__ protocol describes what makes transactions valid, and how th
 
 ## Contributors
 
-Lotion is a cosmic journey for the mind brought to you by ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+Lotion is a cosmic journey for the mind brought to you by:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
@@ -134,9 +134,9 @@ Here are the default options for `opts` which you can override:
 {
   devMode: false,       // set this true to wipe blockchain data between runs
   initialState: {},     // initial blockchain state
-  keys: '',             // path to keys.json generates own keys if not specified.
+  keys: '',             // path to keys.json. generates own keys if not specified.
   genesis: '',          // path to genesis.json. generates new one if not specified.
-  peers: [],            // '<host>:<p2pport>' combos of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
+  peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
   logTendermint: false, // if true, shows all output from the underlying tendermint process                  
   lite: false,          // whether to run in light client mode. if true, must also specify a target.
   target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
@@ -144,6 +144,78 @@ Here are the default options for `opts` which you can override:
   tendermintPort: 46657 // port to use for tendermint rpc
 }
 ```
+
+### middleware
+
+### app.use(function(state, tx, chainInfo) { ... })
+
+Register a transaction handler. Given a `state` and `tx` object, mutate `state` accordingly.
+
+`chainInfo` is an object like:
+
+```js
+{
+  height: 42, // number of blocks committed so far. usually 1 new block per second.
+  validators: {
+    '<some pub key hex>' : 20, // voting power distribution for validators. requires understanding tendermint.
+    '<other pub key hex>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
+  }
+}
+```
+
+If you'd like to change how much voting power a validator should have, simply mutate chainInfo.validators[pubKey] at any point!
+
+### app.useBlock(function(state, chainInfo) { ... })
+
+Add middleware to be called once per block, even if there haven't been any transactions. Should mutate `state`, see above to read more about `chainInfo`.
+
+Most things that you'd use a block handler for can and should be done as `transactions`. Block handlers mostly exist for applications that need to introduce some notion of external time.
+
+### HTTP API
+
+Lotion exposes a few endpoints for interacting with your blockchain. Lotion only listens for connections from localhost. The HTTP API is how you should connect to your Lotion blockchain to your UI -- the UI and Lotion app should run on the same machine.
+
+### `GET /state`
+
+This will return your app's most recent state as JSON.
+
+```bash
+$ curl http://localhost:3000/state
+# {"count": 0}
+```
+
+### `POST /txs`
+
+Create a new transaction and submit it to the network.
+
+```bash
+$ curl http://localhost:3000/txs -d '{}'
+# {"state": {"count": 1},"ok": true}
+```
+
+### `GET /txs`
+
+Returns an array of transactions that have been committed to the blockchain.
+
+```bash
+$ curl http://localhost:3000/txs
+# [{"count": 0}]
+```
+
+### `GET /info`
+
+Get some info about the node, such as its validator public key.
+
+```bash
+$ curl http://localhost:3000/info
+# {"pubKey":"4D9471998DC5A60463B5CF219E4410521112CF578FFAD17C652AEC5D393297C2"}
+```
+
+### `GET|POST /tendermint/*`
+
+Proxies to underlying tendermint node.
+
+
 ## License
 
 MIT
