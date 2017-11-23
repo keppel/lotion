@@ -59,17 +59,37 @@ app.use(function (state, tx) {
 app.listen(3000)
 ```
 
-run `app.js`, then:
+run `node app.js`, then:
 ```bash
 $ curl http://localhost:3000/state
-# { count: 0 }
+# { "count": 0 }
 
 $ curl http://localhost:3000/txs -d '{ "nonce": 0 }'
-# { ok: true }
+# { "ok": true }
 
 $ curl http://localhost:3000/state
-# { count: 1 }
+# { "count": 1 }
 ```
+
+## Introduction
+
+<h2 align="center">
+  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="400"></a>
+</h2>
+
+### Blockchains and Tendermint
+
+The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
+
+To accomplish this, a blockchain is composed of three protocols: the network protocol, consensus protocol, and transaction protocol.
+
+The __network protocol__ is how nodes in the network tell each other about new transactions, blocks, and other nodes; usually a p2p gossip network.
+
+The __consensus protocol__ is the set of rules that nodes should follow to determine which particular ordered set of transformations should be in the ledger at a given moment. In Bitcoin, the chain with the highest difficulty seen by a node is treated as authoritatively correct.
+
+The __transaction protocol__ describes what makes transactions valid, and how they should mutate the blockchain's state.
+
+When you're writing a lotion app, you're only responsible for writing the transaction protocol. Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
 
 ## Examples
 
