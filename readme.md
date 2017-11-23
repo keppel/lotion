@@ -75,7 +75,9 @@ $ curl http://localhost:3000/state
 
 Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called `state`.
 
-Every user who runs your Lotion app will interact with the same blockchain. Anyone can submit a transaction, and it will automagically find its way to everyone else running the app. Everyone's `state` objects will constantly be kept in sync with each other.
+Users will create `transactions`: JavaScript objects that tell the application how to mutate the blockchain's `state`.
+
+Every user who runs your Lotion app will interact with the same blockchain. Anyone can submit a `transaction`, and it will automagically find its way to everyone else running the app. Everyone's `state` objects will constantly be kept in sync with each other.
 
 A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction `tx`. Both are just objects.
 
