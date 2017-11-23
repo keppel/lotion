@@ -73,9 +73,9 @@ $ curl http://localhost:3000/state
 
 ## Introduction
 
-<h2 align="center">
-  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="400"></a>
-</h2>
+<p align="center">
+  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200"></a>
+</p>
 
 ### Blockchains and Tendermint
 
