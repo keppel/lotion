@@ -73,23 +73,43 @@ $ curl http://localhost:3000/state
 
 ## Introduction
 
+### The Gist
+
+Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called `state`.
+
+A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction.
+
+As a developer, all you need to do is design your application's initial state, then write the function to compute this state mutation.
+
+Here's a minimal transaction handler which simply counts the number of transactions that have occurred so far:
+
+```js
+function handleTx(state, tx) {
+  state.count++
+}
+```
+
+Any user who runs your Lotion app will interact with the same blockchain. Transactions will automagically find their way to all your peers, and your `state` objects will constantly be kept in sync.
+
+All of this cosmic witchcraft is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
+
+### Blockchains and Tendermint
 <p align="center">
   <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200"></a>
 </p>
 
-### Blockchains and Tendermint
 
-The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
+The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations (transactions) applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
 
-To accomplish this, a blockchain is composed of three protocols: the network protocol, consensus protocol, and transaction protocol.
+To accomplish this, a blockchain is composed of three protocols: the __network__ protocol, __consensus__ protocol, and __transaction__ protocol.
 
-The __network protocol__ is how nodes in the network tell each other about new transactions, blocks, and other nodes; usually a p2p gossip network.
+The __network__ protocol is how nodes in the network tell each other about new transactions, blocks, and other nodes; usually a p2p gossip network.
 
-The __consensus protocol__ is the set of rules that nodes should follow to determine which particular ordered set of transformations should be in the ledger at a given moment. In Bitcoin, the chain with the highest difficulty seen by a node is treated as authoritatively correct.
+The __consensus__ protocol is the set of rules that nodes should follow to determine which particular ordered set of transformations should be in the ledger at a given moment. In Bitcoin, the chain with the highest difficulty seen by a node is treated as authoritatively correct.
 
-The __transaction protocol__ describes what makes transactions valid, and how they should mutate the blockchain's state.
+The __transaction__ protocol describes what makes transactions valid, and how they should mutate the blockchain's state.
 
-When you're writing a lotion app, you're only responsible for writing the transaction protocol. Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
+**_When you're writing a Lotion app, you're only responsible for writing the transaction protocol._** Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
 
 ## Examples
 
