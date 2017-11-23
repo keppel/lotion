@@ -82,10 +82,10 @@ A Lotion application is often a single function of signature `(state, tx)` which
 All of this cosmic witchcraft is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
 
 <p align="center">
-  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200"></a>
+  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200" /></a>
 </p>
-### Blockchains and Tendermint
 
+### Blockchains and Tendermint
 
 The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations (transactions) applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
 
