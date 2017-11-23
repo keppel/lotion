@@ -25,85 +25,46 @@
 </p>
 <br>
 
+Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of Tendermint using the ABCI protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the Cosmos Network using IBC.
+
+Lotion itself is a tiny framework; its true power comes from the network of small, focused modules built upon it. Adding a fully-featured cryptocurrency to your blockchain, for example, takes only a few lines of code.
+
+Note: the security of this code has not yet been evaluated. If you expect your app to secure real value, please use Cosmos SDK instead.
+
+## Installation
+
+Lotion requires __node v7.6.0__ or higher.
+
+```
+$ npm install lotion
+```
+
+## Usage
+
 ```js
 let lotion = require('lotion')
-let app = lotion({ initialState: { count: 0 }})
+let app = lotion({
+  initialState: {
+    count: 0
+  }
+})
 
-app.use((state, tx) => {
-  state.count++
+app.use(function (state, tx) {
+  if(state.count === tx.nonce) {
+    state.count++
+  }
 })
 
 app.listen(3000)
 ```
 
-**Lotion** makes it super easy to write blockchain apps in JavaScript!
 
-To write a Lotion app, you just need to write one function: the `state machine`. Your `state machine` will take two arguments: the current `state` of your app (just a js object), and a `transaction` (or `tx` for short -- just another js object). Your `state machine` is then responsible for mutating your `state` depending on the data in the `tx`.
-
-Under the hood, the [Tendermint](https://tendermint.com) consensus engine will keep all connected clients in sync with each other as long as your function maps a `(state, transaction)` pair to a state mutation deterministically.
-
-Lotion abstracts away as much of the complicated p2p and consensus logic as possible, exposing it via a simple REST API. This lets you focus on just designing the high-level blockchain logic for your app.
-
-*Note:* the security of Lotion has not yet been evaluated. If you're securing any significant amount of value, please write your app with [Cosmos SDK](https://github.com/tendermint/basecoin) instead.
-
-
-## Usage
-
-```
-npm install lotion
-```
-
-### Example: Counter
-What's the simplest possible app we could make? Let's just count the number of transactions our app sees.
-
-in `counter.js`:
-```js
-let lotion = require('lotion')
-
-let app = lotion({
-  initialState: { count: 0 },
-})
-
-app.use((state, tx) => {
-  state.count++
-})
-```
-
-ok cool, now run it:
-```
-node counter.js
-```
-
-now there's an API running on `http://localhost:3000` to interact with our app's state. let's query the current state from the blockchain with curl:
-
-```
-curl http://localhost:3000/state
-# {"count":0}
-```
-
-now let's send a transaction with some nonsense data in it
-
-```
-curl http://localhost:3000/txs -d '{}'
-```
-
-now query the state again:
-
-```
-curl http://localhost:3000/state
-# {"count":1}
-```
-woo!
-
-### Other Examples
+### Examples
 
 | name | description |
 |------|-------------|
 |[lotion-chat](https://github.com/keppel/lotion-chat) | basic chat on lotion |
 |[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
-
-
-
 
 
 
