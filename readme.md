@@ -59,7 +59,7 @@ app.use(function (state, tx) {
 app.listen(3000)
 ```
 
-in your terminal:
+run `app.js`, then:
 ```bash
 $ curl http://localhost:3000/state
 # { count: 0 }
