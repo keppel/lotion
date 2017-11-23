@@ -75,11 +75,9 @@ $ curl http://localhost:3000/state
 
 Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called `state`.
 
-A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction.
+A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction `tx`. Both are just JavaScript objects.
 
-As a developer, all you need to do is design your application's initial state, then write the function to compute this state mutation.
-
-Any user who runs your Lotion app will interact with the same blockchain. Transactions will automagically find their way to all your peers, and your `state` objects will constantly be kept in sync.
+Any user who runs your Lotion app will interact with the same blockchain. Any user can submit transactions, and those transactions will automagically find everyone running the app, and everyone's `state` objects will constantly be kept in sync.
 
 All of this cosmic witchcraft is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
 
