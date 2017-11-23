@@ -150,6 +150,10 @@ Here are the default options for `opts` which you can override:
 
 Register a transaction handler. Given a `state` and `tx` object, mutate `state` accordingly.
 
+Transaction handlers will be called for every transaction, in the same order you passed them to `app.use()`.
+
+Transaction handlers must be deterministic: for a given set of `state`/`tx`/`chainInfo` inputs, you **must** mutate `state` in the same way.
+
 `chainInfo` is an object like:
 
 ```js
@@ -168,9 +172,9 @@ If you'd like to change how much voting power a validator should have, simply mu
 
 Add middleware to be called once per block, even if there haven't been any transactions. Should mutate `state`, see above to read more about `chainInfo`.
 
-Most things that you'd use a block handler for can and should be done as `transactions`. Block handlers mostly exist for applications that need to introduce some notion of external time.
+Most things that you'd use a block handler for can and should be done as `transactions`.
 
-### HTTP API
+## HTTP API
 
 Lotion exposes a few endpoints for interacting with your blockchain. Lotion only listens for connections from localhost. The HTTP API is how you should connect to your Lotion blockchain to your UI -- the UI and Lotion app should run on the same machine.
 
