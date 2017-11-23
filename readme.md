@@ -25,11 +25,11 @@
 </p>
 <br>
 
-Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of Tendermint using the ABCI protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the Cosmos Network using IBC.
+Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of [Tendermint](https://tendermint.com) using the [ABCI](https://github.com/tendermint/abci) protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the [Cosmos Network](https://cosmos.network/) using [IBC](https://github.com/cosmos/ibc).
 
-Lotion itself is a tiny framework; its true power comes from the network of small, focused modules built upon it. Adding a fully-featured cryptocurrency to your blockchain, for example, takes only a few lines of code.
+Lotion itself is a tiny framework; its true power comes from the network of small, focused modules built upon it. Adding a fully-featured cryptocurrency to your blockchain, for example, takes only a [few lines of code.](https://github.com/mappum/coins)
 
-Note: the security of this code has not yet been evaluated. If you expect your app to secure real value, please use Cosmos SDK instead.
+Note: the security of this code has not yet been evaluated. If you expect your app to secure real value, please use [Cosmos SDK](https://github.com/cosmos/cosmos-sdk) instead.
 
 ## Installation
 
@@ -43,6 +43,7 @@ $ npm install lotion
 
 ```js
 let lotion = require('lotion')
+
 let app = lotion({
   initialState: {
     count: 0
@@ -59,7 +60,7 @@ app.listen(3000)
 ```
 
 
-### Examples
+## Examples
 
 | name | description |
 |------|-------------|
@@ -80,3 +81,7 @@ Lotion is a cosmic journey for the mind brought to you by ([emoji key](https://g
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 Contributions of any kind welcome!
+
+## License
+
+MIT
