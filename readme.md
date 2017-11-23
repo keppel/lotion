@@ -63,7 +63,7 @@ app.listen(3000)
 $ curl http://localhost:3000/state
 # { count: 0 }
 
-$ curl http://localhost:3000/txs -d '{ "count": 0 }'
+$ curl http://localhost:3000/txs -d '{ "nonce": 0 }'
 # { ok: true }
 
 $ curl http://localhost:3000/state
