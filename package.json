@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "nyc tape test/json.js test/counter.js",
-    "install": "node bin/download.js"
+    "install": "node bin/download.js",
+    "contributors:add": "all-contributors add",
+    "contributors:generate": "all-contributors generate"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
@@ -34,6 +36,7 @@
     "webpack": "^3.5.4"
   },
   "devDependencies": {
+    "all-contributors-cli": "^4.9.1",
     "nyc": "^11.3.0",
     "rimraf": "^2.6.2",
     "tape": "^4.8.0",

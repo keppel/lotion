@@ -1,8 +1,8 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/keppel/lotion"><img src="https://user-images.githubusercontent.com/1269291/29349405-8913556c-820e-11e7-8515-bd0e7b2b0027.jpg" alt="Lotion" width="110"></a>
+  <a href="https://github.com/keppel/lotion"><img src="https://user-images.githubusercontent.com/1269291/33154609-741d0d46-cfb7-11e7-9381-ac82418e8fdc.jpg" alt="Lotion" width="200"></a>
   <br>
-      Lotion
+      ✨ Lotion ✨
   <br>
   <br>
 </h1>
@@ -25,85 +25,207 @@
 </p>
 <br>
 
+Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of [Tendermint](https://tendermint.com) using the [ABCI](https://github.com/tendermint/abci) protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the [Cosmos Network](https://cosmos.network/) using [IBC](https://github.com/cosmos/ibc).
+
+Lotion itself is a tiny framework; its true power comes from the network of small, focused modules built upon it. Adding a fully-featured cryptocurrency to your blockchain, for example, takes only a [few lines of code.](https://github.com/mappum/coins)
+
+Note: the security of this code has not yet been evaluated. If you expect your app to secure real value, please use [Cosmos SDK](https://github.com/cosmos/cosmos-sdk) instead.
+
+## Installation
+
+Lotion requires __node v7.6.0__ or higher.
+
+```
+$ npm install lotion
+```
+
+## Usage
+`app.js`:
 ```js
 let lotion = require('lotion')
-let app = lotion({ initialState: { count: 0 }})
 
-app.use((state, tx) => {
-  state.count++
+let app = lotion({
+  initialState: {
+    count: 0
+  }
+})
+
+app.use(function (state, tx) {
+  if(state.count === tx.nonce) {
+    state.count++
+  }
 })
 
 app.listen(3000)
 ```
 
-**Lotion** makes it super easy to write blockchain apps in JavaScript!
+run `node app.js`, then:
+```bash
+$ curl http://localhost:3000/state
+# { "count": 0 }
 
-To write a Lotion app, you just need to write one function: the `state machine`. Your `state machine` will take two arguments: the current `state` of your app (just a js object), and a `transaction` (or `tx` for short -- just another js object). Your `state machine` is then responsible for mutating your `state` depending on the data in the `tx`.
+$ curl http://localhost:3000/txs -d '{ "nonce": 0 }'
+# { "ok": true }
 
-Under the hood, the [Tendermint](https://tendermint.com) consensus engine will keep all connected clients in sync with each other as long as your function maps a `(state, transaction)` pair to a state mutation deterministically.
-
-Lotion abstracts away as much of the complicated p2p and consensus logic as possible, exposing it via a simple REST API. This lets you focus on just designing the high-level blockchain logic for your app.
-
-*Note:* the security of Lotion has not yet been evaluated. If you're securing any significant amount of value, please write your app with [Cosmos SDK](https://github.com/tendermint/basecoin) instead.
-
-
-## Usage
-
-```
-npm install lotion
+$ curl http://localhost:3000/state
+# { "count": 1 }
 ```
 
-### Example: Counter
-What's the simplest possible app we could make? Let's just count the number of transactions our app sees.
+## Introduction
 
-in `counter.js`:
-```js
-let lotion = require('lotion')
+Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called the `state`.
 
-let app = lotion({
-  initialState: { count: 0 },
-})
+Users will create `transactions`: JavaScript objects that tell the application how to mutate the blockchain's `state`.
 
-app.use((state, tx) => {
-  state.count++
-})
-```
+Every user who runs your Lotion app will interact with the same blockchain. Anyone can create a `transaction`, and it will automagically find its way to everyone else running the app and mutate their `state`. Everyone's `state` objects will constantly be kept in sync with each other.
 
-ok cool, now run it:
-```
-node counter.js
-```
+A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction `tx`. Both are just objects.
 
-now there's an API running on `http://localhost:3000` to interact with our app's state. let's query the current state from the blockchain with curl:
+This cosmic wizardry is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
 
-```
-curl http://localhost:3000/state
-# {"count":0}
-```
+<p align="center">
+  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200" /></a>
+</p>
 
-now let's send a transaction with some nonsense data in it
+### Blockchains and Tendermint
 
-```
-curl http://localhost:3000/txs -d '{}'
-```
+The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations (transactions) applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
 
-now query the state again:
+To accomplish this, a blockchain is composed of three protocols: the __network__ protocol, __consensus__ protocol, and __transaction__ protocol.
 
-```
-curl http://localhost:3000/state
-# {"count":1}
-```
-woo!
+The __network__ protocol is how nodes in the network tell each other about new transactions, blocks, and other nodes; usually a p2p gossip network.
 
-### Other Examples
+The __consensus__ protocol is the set of rules that nodes should follow to determine which particular ordered set of transformations should be in the ledger at a given moment. In Bitcoin, the chain with the highest difficulty seen by a node is treated as authoritatively correct.
+
+The __transaction__ protocol describes what makes transactions valid, and how they should mutate the blockchain's state.
+
+**_When you're writing a Lotion app, you're only responsible for writing the transaction protocol._** Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
+
+## Examples
 
 | name | description |
 |------|-------------|
-|[lotion-chat](https://github.com/keppel/lotion-chat) | basic chat on lotion |
+|[lotion-chat](https://github.com/keppel/lotion-chat) | chat and collaborative haikus on lotion |
 |[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
 
 
 
 
+## Contributors
+
+Lotion is a cosmic journey for the mind brought to you by:
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+| [<img src="https://avatars2.githubusercontent.com/u/1269291?v=4" width="100px;"/><br /><sub><b>Judd</b></sub>](https://twitter.com/juddkeppel)<br />[💻](https://github.com/keppel/lotion/commits?author=keppel "Code") [📖](https://github.com/keppel/lotion/commits?author=keppel "Documentation") [🤔](#ideas-keppel "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=keppel "Tests") | [<img src="https://avatars2.githubusercontent.com/u/398285?v=4" width="100px;"/><br /><sub><b>Matt Bell</b></sub>](https://github.com/mappum)<br />[💻](https://github.com/keppel/lotion/commits?author=mappum "Code") [🤔](#ideas-mappum "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=mappum "Tests") [🔌](#plugin-mappum "Plugin/utility libraries") | [<img src="https://avatars1.githubusercontent.com/u/6021933?v=4" width="100px;"/><br /><sub><b>Jordan Bibla</b></sub>](http://www.jordanbibla.com)<br />[🎨](#design-jolesbi "Design") |
+| :---: | :---: | :---: |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+Contributions of any kind welcome!
+
+## API
+
+### `let app = require('lotion')(opts)`
+
+Create a new Lotion app.
+
+Here are the default options for `opts` which you can override:
+```js
+{
+  devMode: false,       // set this true to wipe blockchain data between runs
+  initialState: {},     // initial blockchain state
+  keys: '',             // path to keys.json. generates own keys if not specified.
+  genesis: '',          // path to genesis.json. generates new one if not specified.
+  peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
+  logTendermint: false, // if true, shows all output from the underlying tendermint process                  
+  lite: false,          // whether to run in light client mode. if true, must also specify a target.
+  target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
+  p2pPort: 46658,       // port to use for tendermint peer connections      
+  tendermintPort: 46657 // port to use for tendermint rpc
+}
+```
 
 
+### `app.use(function(state, tx, chainInfo) { ... })`
+
+Register a transaction handler. Given a `state` and `tx` object, mutate `state` accordingly.
+
+Transaction handlers will be called for every transaction, in the same order you passed them to `app.use()`.
+
+Transaction handlers must be deterministic: for a given set of `state`/`tx`/`chainInfo` inputs, you **must** mutate `state` in the same way.
+
+`chainInfo` is an object like:
+
+```js
+{
+  height: 42, // number of blocks committed so far. usually 1 new block per second.
+  validators: {
+    '<some pub key hex>' : 20, // voting power distribution for validators. requires understanding tendermint.
+    '<other pub key hex>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
+  }
+}
+```
+
+If you'd like to change how much voting power a validator should have, simply mutate chainInfo.validators[pubKey] at any point!
+
+### `app.useBlock(function(state, chainInfo) { ... })`
+
+Add middleware to be called once per block, even if there haven't been any transactions. Should mutate `state`, see above to read more about `chainInfo`.
+
+Most things that you'd use a block handler for can and should be done as `transactions`.
+
+### `app.listen(port)`
+
+Starts Lotion app, exposes http server on `port`.
+
+## HTTP API
+
+Lotion exposes a few endpoints for interacting with your blockchain. Lotion only listens for connections from localhost. The HTTP API is how you should connect to your Lotion blockchain to your UI -- the UI and Lotion app should run on the same machine.
+
+### `GET /state`
+
+This will return your app's most recent state as JSON.
+
+```bash
+$ curl http://localhost:3000/state
+# {"count": 0}
+```
+
+### `POST /txs`
+
+Create a new transaction and submit it to the network.
+
+```bash
+$ curl http://localhost:3000/txs -d '{}'
+# {"state": {"count": 1},"ok": true}
+```
+
+### `GET /txs`
+
+Returns an array of transactions that have been committed to the blockchain.
+
+```bash
+$ curl http://localhost:3000/txs
+# [{"count": 0}]
+```
+
+### `GET /info`
+
+Get some info about the node, such as its validator public key.
+
+```bash
+$ curl http://localhost:3000/info
+# {"pubKey":"4D9471998DC5A60463B5CF219E4410521112CF578FFAD17C652AEC5D393297C2"}
+```
+
+### `GET,POST /tendermint/*`
+
+Proxies to underlying tendermint node.
+
+## Links
+
+- go read more at [https://lotionjs.com](https://lotionjs.com)!
+
+## License
+
+MIT
