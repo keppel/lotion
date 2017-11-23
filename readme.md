@@ -174,6 +174,10 @@ Add middleware to be called once per block, even if there haven't been any trans
 
 Most things that you'd use a block handler for can and should be done as `transactions`.
 
+### `app.listen(port)`
+
+Starts Lotion app, exposes http server on `port`.
+
 ## HTTP API
 
 Lotion exposes a few endpoints for interacting with your blockchain. Lotion only listens for connections from localhost. The HTTP API is how you should connect to your Lotion blockchain to your UI -- the UI and Lotion app should run on the same machine.
@@ -218,6 +222,9 @@ $ curl http://localhost:3000/info
 
 Proxies to underlying tendermint node.
 
+## Links
+
+- go read more at [https://lotionjs.com](https://lotionjs.com)!
 
 ## License
 
