@@ -40,7 +40,7 @@ $ npm install lotion
 ```
 
 ## Usage
-
+`app.js`:
 ```js
 let lotion = require('lotion')
 
@@ -59,7 +59,8 @@ app.use(function (state, tx) {
 app.listen(3000)
 ```
 
-```
+in your terminal:
+```bash
 $ curl http://localhost:3000/state
 # { count: 0 }
 
