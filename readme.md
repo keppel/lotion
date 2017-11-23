@@ -77,7 +77,7 @@ Lotion lets you build blockchains. At any moment in time, the whole state of you
 
 Users will create `transactions`: JavaScript objects that tell the application how to mutate the blockchain's `state`.
 
-Every user who runs your Lotion app will interact with the same blockchain. Anyone can submit a `transaction`, and it will automagically find its way to everyone else running the app. Everyone's `state` objects will constantly be kept in sync with each other.
+Every user who runs your Lotion app will interact with the same blockchain. Anyone can create a `transaction`, and it will automagically find its way to everyone else running the app and mutate their `state`. Everyone's `state` objects will constantly be kept in sync with each other.
 
 A Lotion application is often a single function of signature `(state, tx)` which mutates your blockchain's `state` in response to a transaction `tx`. Both are just objects.
 
@@ -123,6 +123,27 @@ Lotion is a cosmic journey for the mind brought to you by ([emoji key](https://g
 
 Contributions of any kind welcome!
 
+## API
+
+### `let app = require('lotion')(opts)`
+
+Create a new Lotion app.
+
+Here are the default options for `opts` which you can override:
+```js
+{
+  devMode: false,       // set this true to wipe blockchain data between runs
+  initialState: {},     // initial blockchain state
+  keys: '',             // path to keys.json generates own keys if not specified.
+  genesis: '',          // path to genesis.json. generates new one if not specified.
+  peers: [],            // '<host>:<p2pport>' combos of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
+  logTendermint: false, // if true, shows all output from the underlying tendermint process                  
+  lite: false,          // whether to run in light client mode. if true, must also specify a target.
+  target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
+  p2pPort: 46658,       // port to use for tendermint peer connections      
+  tendermintPort: 46657 // port to use for tendermint rpc
+}
+```
 ## License
 
 MIT
