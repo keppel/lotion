@@ -73,7 +73,7 @@ $ curl http://localhost:3000/state
 
 ## Introduction
 
-Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called `state`.
+Lotion lets you build blockchains. At any moment in time, the whole state of your blockchain is represented by a single JavaScript object called the `state`.
 
 Users will create `transactions`: JavaScript objects that tell the application how to mutate the blockchain's `state`.
 
@@ -145,9 +145,8 @@ Here are the default options for `opts` which you can override:
 }
 ```
 
-### middleware
 
-### app.use(function(state, tx, chainInfo) { ... })
+### `app.use(function(state, tx, chainInfo) { ... })`
 
 Register a transaction handler. Given a `state` and `tx` object, mutate `state` accordingly.
 
@@ -165,7 +164,7 @@ Register a transaction handler. Given a `state` and `tx` object, mutate `state` 
 
 If you'd like to change how much voting power a validator should have, simply mutate chainInfo.validators[pubKey] at any point!
 
-### app.useBlock(function(state, chainInfo) { ... })
+### `app.useBlock(function(state, chainInfo) { ... })`
 
 Add middleware to be called once per block, even if there haven't been any transactions. Should mutate `state`, see above to read more about `chainInfo`.
 
@@ -211,7 +210,7 @@ $ curl http://localhost:3000/info
 # {"pubKey":"4D9471998DC5A60463B5CF219E4410521112CF578FFAD17C652AEC5D393297C2"}
 ```
 
-### `GET|POST /tendermint/*`
+### `GET,POST /tendermint/*`
 
 Proxies to underlying tendermint node.
 
