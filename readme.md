@@ -59,12 +59,22 @@ app.use(function (state, tx) {
 app.listen(3000)
 ```
 
+```
+$ curl http://localhost:3000/state
+# { count: 0 }
+
+$ curl http://localhost:3000/txs -d '{ "count": 0 }'
+# { ok: true }
+
+$ curl http://localhost:3000/state
+# { count: 1 }
+```
 
 ## Examples
 
 | name | description |
 |------|-------------|
-|[lotion-chat](https://github.com/keppel/lotion-chat) | basic chat on lotion |
+|[lotion-chat](https://github.com/keppel/lotion-chat) | chat and collaborative haikus on lotion |
 |[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
 
 
