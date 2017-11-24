@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/keppel/lotion"><img src="https://user-images.githubusercontent.com/1269291/33154609-741d0d46-cfb7-11e7-9381-ac82418e8fdc.jpg" alt="Lotion" width="200"></a>
+  <a href="https://github.com/keppel/lotion"><img src="https://user-images.githubusercontent.com/1269291/33223131-faf0ba56-d12a-11e7-8dee-e949cf89af90.png" alt="Lotion" width="200"></a>
   <br>
       ✨ Lotion ✨
   <br>
