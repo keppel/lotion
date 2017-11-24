@@ -24,7 +24,7 @@ async function getPorts(peeringPort, rpcPort) {
 }
 
 function getGenesis(genesisPath) {
-  return JSON.parse(fs.readFileSync(genesisPath, { encoding: 'utf8' }))
+  return fs.readFileSync(genesisPath, { encoding: 'utf8' })
 }
 
 module.exports = function Lotion(opts = {}) {
@@ -47,7 +47,9 @@ module.exports = function Lotion(opts = {}) {
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-  let genesis = opts.genesis && getGenesis(opts.genesis)
+  let genesis = typeof opts.genesis === 'string'
+    ? JSON.parse(getGenesis(opts.genesis))
+    : opts.genesis
 
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
@@ -179,7 +181,8 @@ module.exports = function Lotion(opts = {}) {
         abciPort,
         txServerPort,
         p2pPort,
-        genesis: getGenesis(lotionPath + '/genesis.json'),
+        lotionPath,
+        genesisPath: lotionPath + '/genesis.json',
         lite
       }
 
