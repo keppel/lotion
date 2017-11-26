@@ -138,7 +138,7 @@ module.exports = function Lotion(opts = {}) {
         txStats,
         initialAppHash
       })
-      abciServer.listen(abciPort)
+      abciServer.listen(abciPort, 'localhost')
 
       let lotionPath = LOTION_HOME + '/networks/' + networkId
       if (devMode) {
@@ -173,7 +173,7 @@ module.exports = function Lotion(opts = {}) {
         txStats,
         port: txServerPort
       })
-      txHTTPServer = txServer.listen(txServerPort)
+      txHTTPServer = txServer.listen(txServerPort, 'localhost')
 
       // add some references to useful variables to app object.
       appInfo = {
