@@ -17,7 +17,8 @@ const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
 async function getPorts(peeringPort, rpcPort) {
   let p2pPort = peeringPort || (await getPort(peeringPort))
-  let tendermintPort = rpcPort || (await getPort(rpcPort))
+  let tendermintPort =
+    process.env.TENDERMINT_PORT || rpcPort || (await getPort(rpcPort))
   let abciPort = await getPort()
 
   return { tendermintPort, abciPort, p2pPort }
