@@ -187,6 +187,7 @@ module.exports = function Lotion(opts = {}) {
       }
 
       bus.emit('listen')
+      return appInfo
     },
     close: () => {
       abciServer.close()
