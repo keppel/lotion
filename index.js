@@ -35,6 +35,7 @@ module.exports = function Lotion(opts = {}) {
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
+  let unsafeRpc = opts.unsafeRpc
   let txMiddleware = []
   let peeringPort = opts.p2pPort
   let queryMiddleware = []
@@ -161,7 +162,8 @@ module.exports = function Lotion(opts = {}) {
         genesis,
         target,
         keys,
-        initialAppHash
+        initialAppHash,
+        unsafeRpc
       })
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
