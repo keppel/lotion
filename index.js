@@ -11,15 +11,21 @@ let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
 let os = require('os')
+let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
 async function getPorts(peeringPort, rpcPort) {
   let p2pPort = peeringPort || (await getPort(peeringPort))
-  let tendermintPort = rpcPort || (await getPort(rpcPort))
+  let tendermintPort =
+    process.env.TENDERMINT_PORT || rpcPort || (await getPort(rpcPort))
   let abciPort = await getPort()
 
   return { tendermintPort, abciPort, p2pPort }
+}
+
+function getGenesis(genesisPath) {
+  return fs.readFileSync(genesisPath, { encoding: 'utf8' })
 }
 
 module.exports = function Lotion(opts = {}) {
@@ -28,27 +34,39 @@ module.exports = function Lotion(opts = {}) {
   let logTendermint = opts.logTendermint || false
   let target = opts.target
   let devMode = opts.devMode || false
+  let lite = opts.lite || false
+  let unsafeRpc = opts.unsafeRpc
   let txMiddleware = []
   let peeringPort = opts.p2pPort
   let queryMiddleware = []
+  let initializerMiddleware = []
   let blockMiddleware = []
+  let postListenMiddleware = []
   let txEndpoints = []
-  if (opts.lite) {
+  if (lite) {
     Tendermint = TendermintLite
   }
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-  let genesis =
-    opts.genesis &&
-    JSON.parse(fs.readFileSync(opts.genesis, { encoding: 'utf8' }))
+  let genesis = typeof opts.genesis === 'string'
+    ? JSON.parse(getGenesis(opts.genesis))
+    : opts.genesis
+
   let appState = Object.assign({}, initialState)
   let txCache = level({ db: memdown, valueEncoding: 'json' })
   let txStats = { txCountNetwork: 0 }
-  let initialAppHash = getRoot(appState).toString('hex')
+  let bus = new EventEmitter()
+  let appInfo
   let abciServer
   let tendermint
   let txHTTPServer
+
+  bus.on('listen', () => {
+    postListenMiddleware.forEach(f => {
+      f(appInfo)
+    })
+  })
 
   let appMethods = {
     use: middleware => {
@@ -62,8 +80,12 @@ module.exports = function Lotion(opts = {}) {
         appMethods.useQuery(middleware.middleware)
       } else if (middleware.type === 'block') {
         appMethods.useBlock(middleware.middleware)
+      } else if (middleware.type === 'initializer') {
+        appMethods.useInitializer(middleware.middleware)
       } else if (middleware.type === 'tx-endpoint') {
         appMethods.useTxEndpoint(middleware.path, middleware.middleware)
+      } else if (middleware.type === 'post-listen') {
+        appMethods.usePostListen(middleware.middleware)
       }
       return appMethods
     },
@@ -79,6 +101,13 @@ module.exports = function Lotion(opts = {}) {
     useQuery: queryHandler => {
       queryMiddleware.push(queryHandler)
     },
+    useInitializer: initializer => {
+      initializerMiddleware.push(initializer)
+    },
+    usePostListen: postListener => {
+      // TODO: rename "post listen", there's probably a more descriptive name.
+      postListenMiddleware.push(postListener)
+    },
     listen: async txServerPort => {
       const networkId =
         opts.networkId ||
@@ -86,6 +115,7 @@ module.exports = function Lotion(opts = {}) {
           txMiddleware,
           blockMiddleware,
           queryMiddleware,
+          initializerMiddleware,
           initialState,
           devMode,
           genesis
@@ -96,16 +126,21 @@ module.exports = function Lotion(opts = {}) {
         opts.tendermintPort
       )
 
+      initializerMiddleware.forEach(initializer => {
+        initializer(appState)
+      })
+      let initialAppHash = getRoot(appState).toString('hex')
       abciServer = ABCIServer({
         txMiddleware,
         blockMiddleware,
         queryMiddleware,
+        initializerMiddleware,
         appState,
         txCache,
         txStats,
         initialAppHash
       })
-      abciServer.listen(abciPort)
+      abciServer.listen(abciPort, 'localhost')
 
       let lotionPath = LOTION_HOME + '/networks/' + networkId
       if (devMode) {
@@ -127,7 +162,8 @@ module.exports = function Lotion(opts = {}) {
         genesis,
         target,
         keys,
-        initialAppHash
+        initialAppHash,
+        unsafeRpc
       })
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
@@ -140,7 +176,21 @@ module.exports = function Lotion(opts = {}) {
         txStats,
         port: txServerPort
       })
-      txHTTPServer = txServer.listen(txServerPort)
+      txHTTPServer = txServer.listen(txServerPort, 'localhost')
+
+      // add some references to useful variables to app object.
+      appInfo = {
+        tendermintPort,
+        abciPort,
+        txServerPort,
+        p2pPort,
+        lotionPath,
+        genesisPath: lotionPath + '/genesis.json',
+        lite
+      }
+
+      bus.emit('listen')
+      return appInfo
     },
     close: () => {
       abciServer.close()
