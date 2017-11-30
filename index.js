@@ -10,6 +10,8 @@ let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
+let getGenesisRPC = require('./lib/get-genesis-rpc.js')
+let ipfsNode = require('./lib/ipfs-node.js')
 let os = require('os')
 let { EventEmitter } = require('events')
 
@@ -178,6 +180,12 @@ module.exports = function Lotion(opts = {}) {
       })
       txHTTPServer = txServer.listen(txServerPort, 'localhost')
 
+      // serve genesis.json on ipfs and get GCI
+      let genesisJson = await getGenesisRPC(
+        'http://localhost:' + tendermintPort
+      )
+      let GCI = await ipfsNode({ genesisJson, lotionPath })
+      console.log(GCI)
       // add some references to useful variables to app object.
       appInfo = {
         tendermintPort,
