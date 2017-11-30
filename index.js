@@ -191,6 +191,7 @@ module.exports = function Lotion(opts = {}) {
         tendermintPort,
         abciPort,
         txServerPort,
+        GCI,
         p2pPort,
         lotionPath,
         genesisPath: lotionPath + '/genesis.json',
