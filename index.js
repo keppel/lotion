@@ -179,7 +179,9 @@ function Lotion(opts = {}) {
 
       await tendermint.synced
 
-      announceSelfAsFullNode({ GCI, tendermintPort })
+      if (!lite) {
+        announceSelfAsFullNode({ GCI, tendermintPort })
+      }
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
       let txServer = TxServer({
