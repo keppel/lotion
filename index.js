@@ -11,7 +11,7 @@ let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
 let getGenesisRPC = require('./lib/get-genesis-rpc.js')
-let ipfsNode = require('./lib/ipfs-node.js')
+let IPFSNode = require('./lib/ipfs-node.js')
 let os = require('os')
 let { EventEmitter } = require('events')
 
@@ -63,6 +63,7 @@ module.exports = function Lotion(opts = {}) {
   let abciServer
   let tendermint
   let txHTTPServer
+  let closeIpfsNode
 
   bus.on('listen', () => {
     postListenMiddleware.forEach(f => {
@@ -184,7 +185,8 @@ module.exports = function Lotion(opts = {}) {
       let genesisJson = await getGenesisRPC(
         'http://localhost:' + tendermintPort
       )
-      let GCI = await ipfsNode({ genesisJson, lotionPath })
+      let { GCI, close } = await IPFSNode({ genesisJson, lotionPath })
+      closeIpfsNode = close
       // add some references to useful variables to app object.
       appInfo = {
         tendermintPort,
@@ -204,6 +206,7 @@ module.exports = function Lotion(opts = {}) {
       abciServer.close()
       tendermint.close()
       txHTTPServer.close()
+      closeIpfsNode()
     }
   }
 
