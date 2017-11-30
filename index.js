@@ -185,7 +185,6 @@ module.exports = function Lotion(opts = {}) {
         'http://localhost:' + tendermintPort
       )
       let GCI = await ipfsNode({ genesisJson, lotionPath })
-      console.log(GCI)
       // add some references to useful variables to app object.
       appInfo = {
         tendermintPort,
