@@ -63,7 +63,7 @@ module.exports = function Lotion(opts = {}) {
   let abciServer
   let tendermint
   let txHTTPServer
-  let closeIpfsNode
+  let ipfsNode
 
   bus.on('listen', () => {
     postListenMiddleware.forEach(f => {
@@ -185,8 +185,8 @@ module.exports = function Lotion(opts = {}) {
       let genesisJson = await getGenesisRPC(
         'http://localhost:' + tendermintPort
       )
-      let { GCI, close } = await IPFSNode({ genesisJson, lotionPath })
-      closeIpfsNode = close
+      ipfsNode = await IPFSNode({ lotionPath })
+      let GCI = await ipfsNode.add(genesisJson)
       // add some references to useful variables to app object.
       appInfo = {
         tendermintPort,
@@ -206,7 +206,7 @@ module.exports = function Lotion(opts = {}) {
       abciServer.close()
       tendermint.close()
       txHTTPServer.close()
-      closeIpfsNode()
+      ipfsNode.close()
     }
   }
 
