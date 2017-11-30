@@ -29,6 +29,7 @@
     "jsondiffpatch": "^0.2.5",
     "level": "^1.7.0",
     "memdown": "^1.2.4",
+    "peer-network": "^2.0.2",
     "pkg": "^4.2.2",
     "protobufjs": "~5.0.1",
     "tendermint-keys": "^2.0.2",
