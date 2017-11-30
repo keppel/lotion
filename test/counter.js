@@ -55,7 +55,8 @@ test('setup', async t => {
   app.useBlock(blockHandler)
   app.useTxEndpoint('/special', txEndpoint)
 
-  await app.listen(3000)
+  let { GCI } = await app.listen(3000)
+  t.equal(typeof GCI, 'string')
 
   t.end()
 })
