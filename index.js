@@ -11,6 +11,7 @@ let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
 let getGenesisRPC = require('./lib/get-genesis-rpc.js')
+let announceSelfAsFullNode = require('./lib/gci-get-genesis.js')
 let IPFSNode = require('./lib/ipfs-node.js')
 let os = require('os')
 let { EventEmitter } = require('events')
@@ -177,6 +178,8 @@ function Lotion(opts = {}) {
       let GCI = await ipfsNode.add(genesisJson)
 
       await tendermint.synced
+
+      announceSelfAsFullNode({ GCI, tendermintPort })
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
       let txServer = TxServer({
