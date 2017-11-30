@@ -2,7 +2,6 @@ let axios = require('axios')
 let test = require('tape-promise/tape')
 let lotion = require('../index.js')
 let rimraf = require('rimraf')
-let { promisify } = require('util')
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
