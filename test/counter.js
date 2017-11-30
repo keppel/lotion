@@ -136,4 +136,5 @@ test('node info endpoint', async t => {
 test('cleanup', t => {
   app.close()
   t.end()
+  process.exit()
 })
