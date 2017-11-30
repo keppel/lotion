@@ -30,7 +30,7 @@ function getGenesis(genesisPath) {
   return fs.readFileSync(genesisPath, { encoding: 'utf8' })
 }
 
-module.exports = function Lotion(opts = {}) {
+function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
@@ -169,6 +169,15 @@ module.exports = function Lotion(opts = {}) {
         unsafeRpc
       })
 
+      // serve genesis.json on ipfs and get GCI
+      let genesisJson = await getGenesisRPC(
+        'http://localhost:' + tendermintPort
+      )
+      ipfsNode = await IPFSNode({ lotionPath })
+      let GCI = await ipfsNode.add(genesisJson)
+
+      await tendermint.synced
+
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
       let txServer = TxServer({
         tendermintPort,
@@ -181,12 +190,6 @@ module.exports = function Lotion(opts = {}) {
       })
       txHTTPServer = txServer.listen(txServerPort, 'localhost')
 
-      // serve genesis.json on ipfs and get GCI
-      let genesisJson = await getGenesisRPC(
-        'http://localhost:' + tendermintPort
-      )
-      ipfsNode = await IPFSNode({ lotionPath })
-      let GCI = await ipfsNode.add(genesisJson)
       // add some references to useful variables to app object.
       appInfo = {
         tendermintPort,
@@ -212,3 +215,15 @@ module.exports = function Lotion(opts = {}) {
 
   return appMethods
 }
+
+Lotion.connect = function(GCI) {
+  return new Promise(async (resolve, reject) => {
+    // for now, let's create a new lotion app to connect to a full node we hear about
+    // TODO: app.on('close') ?
+
+    // get a full node to connect to
+    let fullNodeRpcAddress = await getPeerGCI(GCI)
+  })
+}
+
+module.exports = Lotion
