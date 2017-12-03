@@ -12,6 +12,7 @@ let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
 let getGenesisRPC = require('./lib/get-genesis-rpc.js')
 let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
+let getPeerGCI = require('./lib/gci-get-peer.js')
 let IPFSNode = require('./lib/ipfs-node.js')
 let os = require('os')
 let { EventEmitter } = require('events')
@@ -178,7 +179,6 @@ function Lotion(opts = {}) {
       let GCI = await ipfsNode.add(genesisJson)
 
       await tendermint.synced
-
       if (!lite) {
         announceSelfAsFullNode({ GCI, tendermintPort })
       }
@@ -227,7 +227,10 @@ Lotion.connect = function(GCI) {
     // TODO: app.on('close') ?
 
     // get a full node to connect to
+    console.log('getting peer...')
     let fullNodeRpcAddress = await getPeerGCI(GCI)
+    console.log('got a peer!')
+    console.log(fullNodeRpcAddress)
   })
 }
 
