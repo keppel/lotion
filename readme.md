@@ -137,7 +137,8 @@ Here are the default options for `opts` which you can override:
   keys: '',             // path to keys.json. generates own keys if not specified.
   genesis: '',          // path to genesis.json. generates new one if not specified.
   peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
-  logTendermint: false, // if true, shows all output from the underlying tendermint process                  
+  logTendermint: false, // if true, shows all output from the underlying tendermint process          
+  createEmptyBlocks: true, // if false, Tendermint will not create empty blocks reducing blockchain size        
   lite: false,          // whether to run in light client mode. if true, must also specify a target.
   target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
   p2pPort: 46658,       // port to use for tendermint peer connections      
