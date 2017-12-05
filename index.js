@@ -188,6 +188,7 @@ function Lotion(opts = {}) {
       }
 
       let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
+      nodeInfo.GCI = GCI
       let txServer = TxServer({
         tendermintPort,
         appState,
