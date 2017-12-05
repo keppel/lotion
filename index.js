@@ -16,6 +16,7 @@ let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
 let getPeerGCI = require('./lib/gci-get-peer.js')
 let IPFSNode = require('./lib/ipfs-node.js')
 let os = require('os')
+let axios = require('axios')
 let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -227,13 +228,34 @@ function Lotion(opts = {}) {
 Lotion.connect = function(GCI) {
   return new Promise(async (resolve, reject) => {
     // for now, let's create a new lotion app to connect to a full node we hear about
-    // TODO: app.on('close') ?
 
+    // get genesis
+    let ipfsNode = await IPFSNode({ lotionPath: LOTION_HOME })
+    let genesis = JSON.parse(await getGenesisGCI(GCI, ipfsNode))
     // get a full node to connect to
-    console.log('getting peer...')
     let fullNodeRpcAddress = await getPeerGCI(GCI)
-    console.log('got a peer!')
-    console.log(fullNodeRpcAddress)
+    let app = Lotion({
+      target: fullNodeRpcAddress,
+      lite: true,
+      devMode: true,
+      initialState: {},
+      genesis
+    })
+    let lcPort = await getPort()
+    let appInfo = await app.listen(lcPort)
+
+    resolve({
+      getState: function() {
+        return axios
+          .get('http://localhost:' + lcPort + '/state')
+          .then(res => res.data)
+      },
+      send: function(tx) {
+        return axios
+          .post('http://localhost:' + lcPort + '/txs', tx)
+          .then(res => res.data)
+      }
+    })
   })
 }
 
