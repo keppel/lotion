@@ -39,7 +39,7 @@ function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
-  let createEmptyBlocks = typeof opts.createEmptyBlocks == undefined
+  let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
     ? true
     : opts.createEmptyBlocks
   let target = opts.target
