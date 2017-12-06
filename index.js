@@ -39,6 +39,9 @@ function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
+  let createEmptyBlocks = typeof opts.createEmptyBlocks == undefined
+    ? true
+    : opts.createEmptyBlocks
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
@@ -159,12 +162,14 @@ function Lotion(opts = {}) {
             process.exit()
           })
         }
+
         tendermint = await Tendermint({
           lotionPath,
           tendermintPort,
           abciPort,
           p2pPort,
           logTendermint,
+          createEmptyBlocks,
           networkId,
           peers,
           genesis,
