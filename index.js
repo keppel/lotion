@@ -16,7 +16,6 @@ let getGCIFromGenesis = require('./lib/get-gci-from-genesis.js')
 let serveGenesisGCI = require('./lib/gci-serve-genesis.js')
 let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
 let getPeerGCI = require('./lib/gci-get-peer.js')
-let IPFSNode = require('./lib/ipfs-node.js')
 let os = require('os')
 let axios = require('axios')
 let { EventEmitter } = require('events')
@@ -69,7 +68,6 @@ function Lotion(opts = {}) {
   let abciServer
   let tendermint
   let txHTTPServer
-  let ipfsNode
 
   bus.on('listen', () => {
     postListenMiddleware.forEach(f => {
@@ -175,7 +173,7 @@ function Lotion(opts = {}) {
         unsafeRpc
       })
 
-      // serve genesis.json on ipfs and get GCI
+      // serve genesis.json and get GCI
       let GCI
       if (!lite) {
         let genesisJson = await getGenesisRPC(
@@ -221,7 +219,6 @@ function Lotion(opts = {}) {
       abciServer.close()
       tendermint.close()
       txHTTPServer.close()
-      ipfsNode.close()
     }
   }
 
@@ -233,10 +230,7 @@ Lotion.connect = function(GCI) {
     // for now, let's create a new lotion app to connect to a full node we hear about
 
     // get genesis
-    let ipfsNode = await IPFSNode({ lotionPath: LOTION_HOME })
-    console.log('getting genesis')
-    let genesis = JSON.parse(await getGenesisGCI(GCI, ipfsNode))
-    console.log('got genesis')
+    let genesis = JSON.parse(await getGenesisGCI(GCI))
     // get a full node to connect to
     let fullNodeRpcAddress = await getPeerGCI(GCI)
     let app = Lotion({
