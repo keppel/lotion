@@ -115,105 +115,107 @@ function Lotion(opts = {}) {
       // TODO: rename "post listen", there's probably a more descriptive name.
       postListenMiddleware.push(postListener)
     },
-    listen: async txServerPort => {
-      const networkId =
-        opts.networkId ||
-        generateNetworkId(
+    listen: txServerPort => {
+      return new Promise(async (resolve, reject) => {
+        const networkId =
+          opts.networkId ||
+          generateNetworkId(
+            txMiddleware,
+            blockMiddleware,
+            queryMiddleware,
+            initializerMiddleware,
+            initialState,
+            devMode,
+            genesis
+          )
+        // set up abci server, then tendermint node, then tx server
+        let { tendermintPort, abciPort, p2pPort } = await getPorts(
+          peeringPort,
+          opts.tendermintPort
+        )
+
+        initializerMiddleware.forEach(initializer => {
+          initializer(appState)
+        })
+        let initialAppHash = getRoot(appState).toString('hex')
+        abciServer = ABCIServer({
           txMiddleware,
           blockMiddleware,
           queryMiddleware,
           initializerMiddleware,
-          initialState,
-          devMode,
-          genesis
-        )
-      // set up abci server, then tendermint node, then tx server
-      let { tendermintPort, abciPort, p2pPort } = await getPorts(
-        peeringPort,
-        opts.tendermintPort
-      )
-
-      initializerMiddleware.forEach(initializer => {
-        initializer(appState)
-      })
-      let initialAppHash = getRoot(appState).toString('hex')
-      abciServer = ABCIServer({
-        txMiddleware,
-        blockMiddleware,
-        queryMiddleware,
-        initializerMiddleware,
-        appState,
-        txCache,
-        txStats,
-        initialAppHash
-      })
-      abciServer.listen(abciPort, 'localhost')
-
-      let lotionPath = LOTION_HOME + '/networks/' + networkId
-      if (devMode) {
-        lotionPath += Math.floor(Math.random() * 1e9)
-        rimraf.sync(lotionPath)
-        process.on('SIGINT', () => {
-          rimraf.sync(lotionPath)
-          process.exit()
+          appState,
+          txCache,
+          txStats,
+          initialAppHash
         })
-      }
-      tendermint = await Tendermint({
-        lotionPath,
-        tendermintPort,
-        abciPort,
-        p2pPort,
-        logTendermint,
-        networkId,
-        peers,
-        genesis,
-        target,
-        keys,
-        initialAppHash,
-        unsafeRpc
+        abciServer.listen(abciPort, 'localhost')
+
+        let lotionPath = LOTION_HOME + '/networks/' + networkId
+        if (devMode) {
+          lotionPath += Math.floor(Math.random() * 1e9)
+          rimraf.sync(lotionPath)
+          process.on('SIGINT', () => {
+            rimraf.sync(lotionPath)
+            process.exit()
+          })
+        }
+        tendermint = await Tendermint({
+          lotionPath,
+          tendermintPort,
+          abciPort,
+          p2pPort,
+          logTendermint,
+          networkId,
+          peers,
+          genesis,
+          target,
+          keys,
+          initialAppHash,
+          unsafeRpc
+        })
+
+        // serve genesis.json and get GCI
+        let GCI
+        if (!lite) {
+          let genesisJson = await getGenesisRPC(
+            'http://localhost:' + tendermintPort
+          )
+          GCI = getGCIFromGenesis(genesisJson)
+          serveGenesisGCI(GCI, genesisJson)
+        }
+        await tendermint.synced
+        if (!lite) {
+          announceSelfAsFullNode({ GCI, tendermintPort })
+        }
+
+        let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
+        nodeInfo.GCI = GCI
+        let txServer = TxServer({
+          tendermintPort,
+          appState,
+          nodeInfo,
+          txEndpoints,
+          txCache,
+          txStats,
+          port: txServerPort
+        })
+        txHTTPServer = txServer.listen(txServerPort, 'localhost', function() {
+          // add some references to useful variables to app object.
+          appInfo = {
+            tendermintPort,
+            abciPort,
+            txServerPort,
+            GCI: GCI,
+            p2pPort,
+            lotionPath,
+            genesisPath: lotionPath + '/genesis.json',
+            lite
+          }
+
+          bus.emit('listen')
+          resolve(appInfo)
+        })
       })
-
-      // serve genesis.json and get GCI
-      let GCI
-      if (!lite) {
-        let genesisJson = await getGenesisRPC(
-          'http://localhost:' + tendermintPort
-        )
-        GCI = getGCIFromGenesis(genesisJson)
-        serveGenesisGCI(GCI, genesisJson)
-      }
-      await tendermint.synced
-      if (!lite) {
-        announceSelfAsFullNode({ GCI, tendermintPort })
-      }
-
-      let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
-      nodeInfo.GCI = GCI
-      let txServer = TxServer({
-        tendermintPort,
-        appState,
-        nodeInfo,
-        txEndpoints,
-        txCache,
-        txStats,
-        port: txServerPort
-      })
-      txHTTPServer = txServer.listen(txServerPort, 'localhost')
-
-      // add some references to useful variables to app object.
-      appInfo = {
-        tendermintPort,
-        abciPort,
-        txServerPort,
-        GCI: GCI,
-        p2pPort,
-        lotionPath,
-        genesisPath: lotionPath + '/genesis.json',
-        lite
-      }
-
-      bus.emit('listen')
-      return appInfo
     },
     close: () => {
       abciServer.close()
@@ -242,20 +244,18 @@ Lotion.connect = function(GCI) {
     })
     let lcPort = await getPort()
     let appInfo = await app.listen(lcPort)
-    setTimeout(() => {
-      resolve({
-        getState: function() {
-          return axios
-            .get('http://localhost:' + lcPort + '/state')
-            .then(res => res.data)
-        },
-        send: function(tx) {
-          return axios
-            .post('http://localhost:' + lcPort + '/txs', tx)
-            .then(res => res.data)
-        }
-      })
-    }, 500)
+    resolve({
+      getState: function() {
+        return axios
+          .get('http://localhost:' + lcPort + '/state')
+          .then(res => res.data)
+      },
+      send: function(tx) {
+        return axios
+          .post('http://localhost:' + lcPort + '/txs', tx)
+          .then(res => res.data)
+      }
+    })
   })
 }
 
