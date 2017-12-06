@@ -242,19 +242,20 @@ Lotion.connect = function(GCI) {
     })
     let lcPort = await getPort()
     let appInfo = await app.listen(lcPort)
-
-    resolve({
-      getState: function() {
-        return axios
-          .get('http://localhost:' + lcPort + '/state')
-          .then(res => res.data)
-      },
-      send: function(tx) {
-        return axios
-          .post('http://localhost:' + lcPort + '/txs', tx)
-          .then(res => res.data)
-      }
-    })
+    setTimeout(() => {
+      resolve({
+        getState: function() {
+          return axios
+            .get('http://localhost:' + lcPort + '/state')
+            .then(res => res.data)
+        },
+        send: function(tx) {
+          return axios
+            .post('http://localhost:' + lcPort + '/txs', tx)
+            .then(res => res.data)
+        }
+      })
+    }, 500)
   })
 }
 
