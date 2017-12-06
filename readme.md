@@ -223,6 +223,38 @@ $ curl http://localhost:3000/info
 
 Proxies to underlying tendermint node.
 
+## Global Chain Identifiers and Light Clients
+
+Lotion apps each have a unique global chain identifier (GCI). You can light client verify any running Lotion app from any computer in the world as long as you know its GCI.
+
+```js
+let { connect } = require('lotion')
+let GCI = '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
+
+let { getState, send } = await connect(GCI)
+
+let state = await getState()
+console.log(state) // { count: 0 }
+
+let result = await send({ nonce: 0 })
+console.log(result) // { height: 42, ok: true }
+
+state = await getState()
+console.log(state) // { count: 1 }
+```
+
+Under the hood, the GCI is used to discover and torrent the app's genesis.json.
+
+It's also used as the rendezvous point with peers on the bittorrent dht and through multicast DNS to find a full node light client verify.
+
+You can get the GCI of an app being run by a full node like this:
+```js
+let app = require('lotion')({ initialState: { count: 0 } })
+
+let { GCI } = await app.listen(3000)
+console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
+```
+
 ## Links
 
 - go read more at [https://lotionjs.com](https://lotionjs.com)!

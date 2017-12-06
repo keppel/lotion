@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.16.2",
+    "discovery-channel": "^5.4.6",
+    "discovery-server": "^1.1.0",
     "get-port": "^3.1.0"
   }
 }
