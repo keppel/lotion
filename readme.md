@@ -22,6 +22,9 @@
     <img src="https://img.shields.io/npm/v/lotion.svg"
          alt="NPM Version">
   </a>
+  <a href="https://slack.lotionjs.com">
+    <img src="https://img.shields.io/badge/chat-on%20slack-7A5979.svg" alt="chat on slack">
+  </a>
 </p>
 <br>
 
@@ -101,12 +104,17 @@ The __transaction__ protocol describes what makes transactions valid, and how th
 
 **_When you're writing a Lotion app, you're only responsible for writing the transaction protocol._** Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
 
-## Examples
+## Modules
 
 | name | description |
 |------|-------------|
 |[lotion-chat](https://github.com/keppel/lotion-chat) | chat and collaborative haikus on lotion |
-|[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
+|[lotion-coin](https://github.com/keppel/lotion-coin) | early cryptocurrency prototype |
+|[coins](https://github.com/mappum/coins) | fully-featured cryptocurrency middleware |
+|[htlc](https://github.com/mappum/htlc) | hashed timelock contracts on coins |
+|[testnet](https://github.com/keppel/testnet) | single-command testnet deployment |
+|[shea](https://github.com/keppel/shea) | on-chain client code management |
+|[merk](https://github.com/mappum/merk) | merkle AVL trees in javascript |
 
 
 
@@ -117,8 +125,8 @@ Lotion is a cosmic journey for the mind brought to you by:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/1269291?v=4" width="100px;"/><br /><sub><b>Judd</b></sub>](https://twitter.com/juddkeppel)<br />[💻](https://github.com/keppel/lotion/commits?author=keppel "Code") [📖](https://github.com/keppel/lotion/commits?author=keppel "Documentation") [🤔](#ideas-keppel "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=keppel "Tests") | [<img src="https://avatars2.githubusercontent.com/u/398285?v=4" width="100px;"/><br /><sub><b>Matt Bell</b></sub>](https://github.com/mappum)<br />[💻](https://github.com/keppel/lotion/commits?author=mappum "Code") [🤔](#ideas-mappum "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=mappum "Tests") [🔌](#plugin-mappum "Plugin/utility libraries") | [<img src="https://avatars1.githubusercontent.com/u/6021933?v=4" width="100px;"/><br /><sub><b>Jordan Bibla</b></sub>](http://www.jordanbibla.com)<br />[🎨](#design-jolesbi "Design") | [<img src="https://avatars0.githubusercontent.com/u/18440102?v=4" width="100px;"/><br /><sub><b>Gautier Marin</b></sub>](https://github.com/gamarin2)<br />[📝](#blog-gamarin2 "Blogposts") |
-| :---: | :---: | :---: | :---: |
+| [<img src="https://avatars2.githubusercontent.com/u/1269291?v=4" width="100px;"/><br /><sub><b>Judd</b></sub>](https://twitter.com/juddkeppel)<br />[💻](https://github.com/keppel/lotion/commits?author=keppel "Code") [📖](https://github.com/keppel/lotion/commits?author=keppel "Documentation") [🤔](#ideas-keppel "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=keppel "Tests") | [<img src="https://avatars2.githubusercontent.com/u/398285?v=4" width="100px;"/><br /><sub><b>Matt Bell</b></sub>](https://github.com/mappum)<br />[💻](https://github.com/keppel/lotion/commits?author=mappum "Code") [🤔](#ideas-mappum "Ideas, Planning, & Feedback") [⚠️](https://github.com/keppel/lotion/commits?author=mappum "Tests") [🔌](#plugin-mappum "Plugin/utility libraries") | [<img src="https://avatars1.githubusercontent.com/u/6021933?v=4" width="100px;"/><br /><sub><b>Jordan Bibla</b></sub>](http://www.jordanbibla.com)<br />[🎨](#design-jolesbi "Design") | [<img src="https://avatars0.githubusercontent.com/u/18440102?v=4" width="100px;"/><br /><sub><b>Gautier Marin</b></sub>](https://github.com/gamarin2)<br />[📝](#blog-gamarin2 "Blogposts") | [<img src="https://avatars3.githubusercontent.com/u/1147244?v=4" width="100px;"/><br /><sub><b>Jackson Roberts</b></sub>](https://github.com/Jaxkr)<br />[💻](https://github.com/keppel/lotion/commits?author=Jaxkr "Code") |
+| :---: | :---: | :---: | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 Contributions of any kind welcome!
@@ -137,7 +145,8 @@ Here are the default options for `opts` which you can override:
   keys: '',             // path to keys.json. generates own keys if not specified.
   genesis: '',          // path to genesis.json. generates new one if not specified.
   peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
-  logTendermint: false, // if true, shows all output from the underlying tendermint process                  
+  logTendermint: false, // if true, shows all output from the underlying tendermint process          
+  createEmptyBlocks: true, // if false, Tendermint will not create empty blocks which may result in a reduced blockchain file size        
   lite: false,          // whether to run in light client mode. if true, must also specify a target.
   target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
   p2pPort: 46658,       // port to use for tendermint peer connections      
@@ -221,6 +230,38 @@ $ curl http://localhost:3000/info
 ### `GET,POST /tendermint/*`
 
 Proxies to underlying tendermint node.
+
+## Global Chain Identifiers and Light Clients
+
+Lotion apps each have a unique global chain identifier (GCI). You can light client verify any running Lotion app from any computer in the world as long as you know its GCI.
+
+```js
+let { connect } = require('lotion')
+let GCI = '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
+
+let { getState, send } = await connect(GCI)
+
+let state = await getState()
+console.log(state) // { count: 0 }
+
+let result = await send({ nonce: 0 })
+console.log(result) // { height: 42, ok: true }
+
+state = await getState()
+console.log(state) // { count: 1 }
+```
+
+Under the hood, the GCI is used to discover and torrent the app's genesis.json.
+
+It's also used as the rendezvous point with peers on the bittorrent dht and through multicast DNS to find a full node light client verify.
+
+You can get the GCI of an app being run by a full node like this:
+```js
+let app = require('lotion')({ initialState: { count: 0 } })
+
+let { GCI } = await app.listen(3000)
+console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
+```
 
 ## Links
 

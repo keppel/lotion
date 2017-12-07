@@ -17,4 +17,6 @@ app.use((state, tx) => {
   state.count++
 })
 
-app.listen(port)
+app.listen(port).then(({ GCI }) => {
+  console.log(GCI)
+})
