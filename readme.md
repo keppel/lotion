@@ -114,6 +114,7 @@ The __transaction__ protocol describes what makes transactions valid, and how th
 |[htlc](https://github.com/mappum/htlc) | hashed timelock contracts on coins |
 |[testnet](https://github.com/keppel/testnet) | single-command testnet deployment |
 |[shea](https://github.com/keppel/shea) | on-chain client code management |
+|[merk](https://github.com/mappum/merk) | merkle AVL trees in javascript |
 
 
 
