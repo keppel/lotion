@@ -109,7 +109,11 @@ The __transaction__ protocol describes what makes transactions valid, and how th
 | name | description |
 |------|-------------|
 |[lotion-chat](https://github.com/keppel/lotion-chat) | chat and collaborative haikus on lotion |
-|[lotion-coin](https://github.com/keppel/lotion-coin) | cryptocurrency on lotion | 
+|[lotion-coin](https://github.com/keppel/lotion-coin) | early cryptocurrency prototype |
+|[coins](https://github.com/mappum/coins) | fully-featured cryptocurrency middleware |
+|[htlc](https://github.com/mappum/htlc) | hashed timelock contracts on coins |
+|[testnet](https://github.com/keppel/testnet) | single-command testnet deployment |
+|[shea](https://github.com/keppel/shea) | on-chain client code management |
 
 
 
