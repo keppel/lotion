@@ -22,6 +22,9 @@
     <img src="https://img.shields.io/npm/v/lotion.svg"
          alt="NPM Version">
   </a>
+  <a href="https://slack.lotionjs.com">
+    <img src="https://img.shields.io/badge/chat-on%20slack-7A5979.svg" alt="chat on slack">
+  </a>
 </p>
 <br>
 
