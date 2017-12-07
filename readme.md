@@ -104,7 +104,7 @@ The __transaction__ protocol describes what makes transactions valid, and how th
 
 **_When you're writing a Lotion app, you're only responsible for writing the transaction protocol._** Under the hood, Tendermint is handling the consensus and network protocols. When you start your lotion app, a Tendermint node is also started which will handle all of the communication with other nodes running your lotion app.
 
-## Examples
+## Modules
 
 | name | description |
 |------|-------------|
