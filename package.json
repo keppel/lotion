@@ -1,6 +1,6 @@
 {
   "name": "lotion",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "index.js",
   "directories": {
@@ -19,8 +19,9 @@
     "axios": "^0.16.2",
     "body-parser": "^1.17.2",
     "browserify": "^14.4.0",
+    "dat-swarm-defaults": "^1.0.0",
+    "discovery-channel": "^5.4.6",
     "discovery-server": "^1.1.0",
-    "discovery-swarm": "^4.4.2",
     "execa": "^0.8.0",
     "express": "^4.15.4",
     "express-http-proxy": "^1.0.7",
@@ -30,10 +31,7 @@
     "jsondiffpatch": "^0.2.5",
     "level": "^1.7.0",
     "memdown": "^1.2.4",
-    "peer-network": "^2.0.2",
-    "pkg": "^4.2.2",
     "protobufjs": "~5.0.1",
-    "tendermint-keys": "^2.0.2",
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1",
     "webpack": "^3.5.4"
