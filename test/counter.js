@@ -23,6 +23,9 @@ test('setup', async t => {
 
   app = lotion(opts)
   function txHandler(state, tx, chainInfo) {
+    if (tx.doNothing) {
+      return
+    }
     state.txCount++
     if (tx.shouldError === true) {
       throw new Error('this transaction should cause an error')
@@ -124,6 +127,15 @@ test('deeply nested state mutations', async t => {
   })
   t.equal(result.data.state.accounts.foo.otherBalance, 60)
   t.end()
+})
+
+test("tx that doesn't mutate state", async t => {
+  let result = await axios.post('http://localhost:3000/txs', {
+    doNothing: true
+  })
+  const expectedErrorMessage = 'transaction must mutate state to be valid'
+  t.equal(result.data.result.check_tx.code, 2)
+  t.equal(result.data.result.check_tx.log, expectedErrorMessage)
 })
 
 test('node info endpoint', async t => {
