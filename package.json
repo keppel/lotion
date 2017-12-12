@@ -31,7 +31,7 @@
     "jsondiffpatch": "^0.2.5",
     "level": "^1.7.0",
     "memdown": "^1.2.4",
-    "protobufjs": "~5.0.1",
+    "protobufjs": "^6.8.3",
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1",
     "webpack": "^3.5.4"
