@@ -22,11 +22,12 @@ let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
-async function getPorts(peeringPort, rpcPort) {
-  let p2pPort = peeringPort || (await getPort(peeringPort))
+async function getPorts(peeringPort, rpcPort, abciAppPort) {
+  let p2pPort =
+    process.env.P2P_PORT || peeringPort || (await getPort(peeringPort))
   let tendermintPort =
     process.env.TENDERMINT_PORT || rpcPort || (await getPort(rpcPort))
-  let abciPort = await getPort()
+  let abciPort = process.env.ABCI_PORT || abciAppPort || (await getPort())
 
   return { tendermintPort, abciPort, p2pPort }
 }
@@ -47,7 +48,6 @@ function Lotion(opts = {}) {
   let lite = opts.lite || false
   let unsafeRpc = opts.unsafeRpc
   let txMiddleware = []
-  let peeringPort = opts.p2pPort
   let queryMiddleware = []
   let initializerMiddleware = []
   let blockMiddleware = []
@@ -133,8 +133,9 @@ function Lotion(opts = {}) {
           )
         // set up abci server, then tendermint node, then tx server
         let { tendermintPort, abciPort, p2pPort } = await getPorts(
-          peeringPort,
-          opts.tendermintPort
+          opts.p2pPort,
+          opts.tendermintPort,
+          opts.abciPort
         )
 
         initializerMiddleware.forEach(initializer => {
