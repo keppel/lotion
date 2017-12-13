@@ -1,5 +1,5 @@
 let getPort = require('get-port')
-let fs = require('fs')
+let fs = require('fs-extra')
 let memdown = require('memdown')
 let level = require('level')
 let ABCIServer = require('./lib/abci-app.js')
@@ -163,6 +163,7 @@ function Lotion(opts = {}) {
             process.exit()
           })
         }
+        await fs.mkdirp(lotionPath)
 
         tendermint = await Tendermint({
           lotionPath,
