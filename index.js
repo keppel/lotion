@@ -1,5 +1,5 @@
 let getPort = require('get-port')
-let fs = require('fs')
+let fs = require('fs-extra')
 let memdown = require('memdown')
 let level = require('level')
 let ABCIServer = require('./lib/abci-app.js')
@@ -22,11 +22,12 @@ let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
 
-async function getPorts(peeringPort, rpcPort) {
-  let p2pPort = peeringPort || (await getPort(peeringPort))
+async function getPorts(peeringPort, rpcPort, abciAppPort) {
+  let p2pPort =
+    process.env.P2P_PORT || peeringPort || (await getPort(peeringPort))
   let tendermintPort =
     process.env.TENDERMINT_PORT || rpcPort || (await getPort(rpcPort))
-  let abciPort = await getPort()
+  let abciPort = process.env.ABCI_PORT || abciAppPort || (await getPort())
 
   return { tendermintPort, abciPort, p2pPort }
 }
@@ -47,7 +48,6 @@ function Lotion(opts = {}) {
   let lite = opts.lite || false
   let unsafeRpc = opts.unsafeRpc
   let txMiddleware = []
-  let peeringPort = opts.p2pPort
   let queryMiddleware = []
   let initializerMiddleware = []
   let blockMiddleware = []
@@ -133,8 +133,9 @@ function Lotion(opts = {}) {
           )
         // set up abci server, then tendermint node, then tx server
         let { tendermintPort, abciPort, p2pPort } = await getPorts(
-          peeringPort,
-          opts.tendermintPort
+          opts.p2pPort,
+          opts.tendermintPort,
+          opts.abciPort
         )
 
         initializerMiddleware.forEach(initializer => {
@@ -162,22 +163,28 @@ function Lotion(opts = {}) {
             process.exit()
           })
         }
+        await fs.mkdirp(lotionPath)
 
-        tendermint = await Tendermint({
-          lotionPath,
-          tendermintPort,
-          abciPort,
-          p2pPort,
-          logTendermint,
-          createEmptyBlocks,
-          networkId,
-          peers,
-          genesis,
-          target,
-          keys,
-          initialAppHash,
-          unsafeRpc
-        })
+        try {
+          tendermint = await Tendermint({
+            lotionPath,
+            tendermintPort,
+            abciPort,
+            p2pPort,
+            logTendermint,
+            createEmptyBlocks,
+            networkId,
+            peers,
+            genesis,
+            target,
+            keys,
+            initialAppHash,
+            unsafeRpc
+          })
+        } catch (e) {
+          console.log('error starting tendermint node:')
+          console.log(e)
+        }
 
         // serve genesis.json and get GCI
         let GCI
@@ -237,7 +244,13 @@ Lotion.connect = function(GCI) {
     // for now, let's create a new lotion app to connect to a full node we hear about
 
     // get genesis
-    let genesis = JSON.parse(await getGenesisGCI(GCI))
+    let genesis
+
+    try {
+      genesis = JSON.parse(await getGenesisGCI(GCI))
+    } catch (e) {
+      return console.log('invalid genesis.json from GCI')
+    }
     // get a full node to connect to
     let fullNodeRpcAddress = await getPeerGCI(GCI)
     let app = Lotion({

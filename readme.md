@@ -263,6 +263,8 @@ let { GCI } = await app.listen(3000)
 console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
 ```
 
+*Note*: as of v0.1.8, light clients trust the full nodes they connect to. This will be resolved soon. 
+
 ## Links
 
 - go read more at [https://lotionjs.com](https://lotionjs.com)!
