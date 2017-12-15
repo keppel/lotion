@@ -1,5 +1,5 @@
 exports.tendermint = {
-  darwin: 'https://github.com/tendermint/tendermint/releases/download/v0.14.0/tendermint_0.14.0_darwin_amd64.zip',
-  win32: 'https://github.com/tendermint/tendermint/releases/download/v0.14.0/tendermint_0.14.0_windows_amd64.zip',
-  linux: 'https://github.com/tendermint/tendermint/releases/download/v0.14.0/tendermint_0.14.0_linux_amd64.zip'
+  darwin: 'https://tendermint.nyc3.digitaloceanspaces.com/darwin-tendermint-v0.14.0.zip',
+  win32: 'https://tendermint.nyc3.digitaloceanspaces.com/windows-tendermint-v0.14.0.zip',
+  linux: 'https://tendermint.nyc3.digitaloceanspaces.com/linux-tendermint-v0.14.0.zip'
 }
