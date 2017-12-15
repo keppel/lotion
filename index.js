@@ -239,7 +239,13 @@ Lotion.connect = function(GCI) {
     // for now, let's create a new lotion app to connect to a full node we hear about
 
     // get genesis
-    let genesis = JSON.parse(await getGenesisGCI(GCI))
+    let genesis
+
+    try {
+      genesis = JSON.parse(await getGenesisGCI(GCI))
+    } catch (e) {
+      return console.log('invalid genesis.json from GCI')
+    }
     // get a full node to connect to
     let fullNodeRpcAddress = await getPeerGCI(GCI)
     let app = Lotion({
