@@ -165,21 +165,26 @@ function Lotion(opts = {}) {
         }
         await fs.mkdirp(lotionPath)
 
-        tendermint = await Tendermint({
-          lotionPath,
-          tendermintPort,
-          abciPort,
-          p2pPort,
-          logTendermint,
-          createEmptyBlocks,
-          networkId,
-          peers,
-          genesis,
-          target,
-          keys,
-          initialAppHash,
-          unsafeRpc
-        })
+        try {
+          tendermint = await Tendermint({
+            lotionPath,
+            tendermintPort,
+            abciPort,
+            p2pPort,
+            logTendermint,
+            createEmptyBlocks,
+            networkId,
+            peers,
+            genesis,
+            target,
+            keys,
+            initialAppHash,
+            unsafeRpc
+          })
+        } catch (e) {
+          console.log('error starting tendermint node:')
+          console.log(e)
+        }
 
         // serve genesis.json and get GCI
         let GCI
