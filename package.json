@@ -19,6 +19,7 @@
     "axios": "^0.16.2",
     "body-parser": "^1.17.2",
     "browserify": "^14.4.0",
+    "bytebuffer": "^5.0.1",
     "dat-swarm-defaults": "^1.0.0",
     "discovery-channel": "^5.4.6",
     "discovery-server": "^1.1.0",
