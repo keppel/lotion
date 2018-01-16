@@ -36,7 +36,7 @@ Note: the security of this code has not yet been evaluated. If you expect your a
 
 ## Installation
 
-Lotion requires __node v7.6.0__ or higher.
+Lotion requires __node v7.6.0__ or higher, and a mac or linux machine.
 
 ```
 $ npm install lotion
