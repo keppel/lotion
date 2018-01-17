@@ -138,6 +138,8 @@ function Lotion(opts = {}) {
           opts.abciPort
         )
 
+        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
+
         initializerMiddleware.forEach(initializer => {
           initializer(appState)
         })
@@ -203,7 +205,7 @@ function Lotion(opts = {}) {
         let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
         nodeInfo.GCI = GCI
         let txServer = TxServer({
-          tendermintPort,
+          tendermintRpcUrl,
           appState,
           nodeInfo,
           txEndpoints,
