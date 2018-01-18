@@ -271,7 +271,16 @@ Lotion.connect = function(GCI, opts = {}) {
     }
     // get a full node to connect to
     // use a peer from opts.peers if available. fall back to dht lookup.
-    let fullNodeRpcAddress = nodes[0] || (await getPeerGCI(GCI))
+
+    let fullNodeRpcAddress
+    if (nodes.length) {
+      // randomly sample from supplied seed nodes
+      let randomIndex = Math.floor(Math.random() * nodes.length)
+      fullNodeRpcAddress = nodes[randomIndex]
+    } else {
+      fullNodeRpcAddress = await getPeerGCI(GCI)
+    }
+
     let clientState = {
       validators: genesis.validators,
       commit: null,
