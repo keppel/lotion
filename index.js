@@ -339,6 +339,10 @@ Lotion.connect = function(GCI, opts = {}) {
                 })
               })
             })
+            .catch(e => {
+              console.log('error broadcasting transaction:')
+              console.log(e)
+            })
         })
       }
     })
