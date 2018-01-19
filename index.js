@@ -262,12 +262,14 @@ Lotion.connect = function(GCI, opts = {}) {
   return new Promise(async (resolve, reject) => {
     let nodes = opts.nodes || []
     // get genesis
-    let genesis
+    let genesis = opts.genesis
 
-    try {
-      genesis = JSON.parse(await getGenesisGCI(GCI))
-    } catch (e) {
-      return console.log('invalid genesis.json from GCI')
+    if (!genesis) {
+      try {
+        genesis = JSON.parse(await getGenesisGCI(GCI))
+      } catch (e) {
+        return console.log('invalid genesis.json from GCI')
+      }
     }
     // get a full node to connect to
     // use a peer from opts.peers if available. fall back to dht lookup.
