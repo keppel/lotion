@@ -35,7 +35,7 @@
     "memdown": "^1.2.4",
     "mkdirp": "^0.5.1",
     "protobufjs": "^6.8.3",
-    "tendermint": "^3.1.0",
+    "tendermint": "^3.1.1",
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1",
     "webpack": "^3.5.4"
