@@ -10,7 +10,7 @@ axios({
   method: 'get',
   responseType: 'stream'
 }).then(function(response) {
-  let ws = fs.createWriteStream(path.join(__dirname, '/tendermint' + isWin ? '.exe'), { mode: 0o777 })
+  let ws = fs.createWriteStream(path.join(__dirname, '/tendermint' + isWin ? '.exe' : ''), { mode: 0o777 })
   response.data.pipe(unzip.Parse()).on('entry', function(entry) {
     entry.pipe(ws)
   })
