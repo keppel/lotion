@@ -249,7 +249,7 @@ let { parse } = require('./lib/json.js')
 function waitForHeight(height, lc) {
   return new Promise((resolve, reject) => {
     function handleUpdate(header) {
-      if (header.height >= height) {
+      if (header.height > height) {
         resolve()
         lc.removeListener('update', handleUpdate)
       }
@@ -295,31 +295,24 @@ Lotion.connect = function(GCI, opts = {}) {
 
     lc.on('update', function(header, commit, validators) {
       let appHash = header.app_hash
-      appHashByHeight[header.height] = appHash
+      appHashByHeight[header.height - 1] = appHash
     })
     let bus = new EventEmitter()
     rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
       bus.emit('block')
     })
     resolve({
-      getState: async function() {
-        let queryResponse = await axios
-          .get(`${fullNodeRpcAddress}/abci_query?data=""&opts={"trusted":true}`)
-          .catch(e => {
-            console.log(e)
-          })
+      getState: async function(path = '') {
+        let queryResponse = await axios.get(
+          `${fullNodeRpcAddress}/abci_query?path="${path}"`
+        )
         let resp = queryResponse.data.result.response
-        let value = parse(Buffer.from(resp.value, 'hex').toString())
+        resp.height = Number(resp.height)
+        let proof = parse(Buffer.from(resp.proof, 'hex').toString())
         await waitForHeight(resp.height, lc)
-        let responseAppHash = getRoot(value)
-          .toString('hex')
-          .toUpperCase()
-
-        if (responseAppHash === appHashByHeight[resp.height]) {
-          return value
-        } else {
-          throw Error('invalid state from full node')
-        }
+        let rootHash = appHashByHeight[resp.height].toLowerCase()
+        let verifiedValue = merk.verify(rootHash, proof, path)
+        return verifiedValue
       },
       send: function(tx) {
         return new Promise((resolve, reject) => {
@@ -348,16 +341,12 @@ Lotion.connect = function(GCI, opts = {}) {
             .catch(e => {
               console.log('error broadcasting transaction:')
               console.log(e)
+              reject(e)
             })
         })
       }
     })
   })
 }
-
-process.on('unhandledRejection', e => {
-  console.log('error')
-  console.log(e)
-})
 
 module.exports = Lotion
