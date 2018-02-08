@@ -18,6 +18,7 @@ let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
 let getPeerGCI = require('./lib/gci-get-peer.js')
 let os = require('os')
 let axios = require('axios')
+let merk = require('merk')
 let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -137,25 +138,6 @@ function Lotion(opts = {}) {
           opts.tendermintPort,
           opts.abciPort
         )
-
-        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
-
-        initializerMiddleware.forEach(initializer => {
-          initializer(appState)
-        })
-        let initialAppHash = getRoot(appState).toString('hex')
-        abciServer = ABCIServer({
-          txMiddleware,
-          blockMiddleware,
-          queryMiddleware,
-          initializerMiddleware,
-          appState,
-          txCache,
-          txStats,
-          initialAppHash
-        })
-        abciServer.listen(abciPort, 'localhost')
-
         let lotionPath = LOTION_HOME + '/networks/' + networkId
         if (devMode) {
           lotionPath += Math.floor(Math.random() * 1e9)
@@ -166,6 +148,27 @@ function Lotion(opts = {}) {
           })
         }
         await fs.mkdirp(lotionPath)
+
+        // initialize merk store
+        let merkDb = level(lotionPath + '/merk')
+        let store = await merk(merkDb)
+
+        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
+
+        initializerMiddleware.forEach(initializer => {
+          initializer(appState)
+        })
+        Object.assign(store, appState)
+        let initialAppHash = (await getRoot(store)).toString('hex')
+        abciServer = ABCIServer({
+          txMiddleware,
+          blockMiddleware,
+          queryMiddleware,
+          initializerMiddleware,
+          store,
+          initialAppHash
+        })
+        abciServer.listen(abciPort, 'localhost')
 
         try {
           tendermint = await Tendermint({
