@@ -41,9 +41,10 @@ function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
-  let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
-    ? true
-    : opts.createEmptyBlocks
+  let createEmptyBlocks =
+    typeof opts.createEmptyBlocks === 'undefined'
+      ? true
+      : opts.createEmptyBlocks
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
@@ -60,13 +61,12 @@ function Lotion(opts = {}) {
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-  let genesis = typeof opts.genesis === 'string'
-    ? JSON.parse(getGenesis(opts.genesis))
-    : opts.genesis
+  let genesis =
+    typeof opts.genesis === 'string'
+      ? JSON.parse(getGenesis(opts.genesis))
+      : opts.genesis
 
   let appState = Object.assign({}, initialState)
-  let txCache = level({ db: memdown, valueEncoding: 'json' })
-  let txStats = { txCountNetwork: 0 }
   let bus = new EventEmitter()
   let appInfo
   let abciServer
@@ -212,8 +212,6 @@ function Lotion(opts = {}) {
           appState,
           nodeInfo,
           txEndpoints,
-          txCache,
-          txStats,
           port: txServerPort
         })
         txHTTPServer = txServer.listen(txServerPort, 'localhost', function() {
@@ -313,7 +311,9 @@ Lotion.connect = function(GCI, opts = {}) {
         let resp = queryResponse.data.result.response
         let value = parse(Buffer.from(resp.value, 'hex').toString())
         await waitForHeight(resp.height, lc)
-        let responseAppHash = getRoot(value).toString('hex').toUpperCase()
+        let responseAppHash = getRoot(value)
+          .toString('hex')
+          .toUpperCase()
 
         if (responseAppHash === appHashByHeight[resp.height]) {
           return value
@@ -328,7 +328,10 @@ Lotion.connect = function(GCI, opts = {}) {
 
           axios
             .get(
-              `${fullNodeRpcAddress.replace('ws:', 'http:')}/broadcast_tx_commit`,
+              `${fullNodeRpcAddress.replace(
+                'ws:',
+                'http:'
+              )}/broadcast_tx_commit`,
               {
                 params: {
                   tx: txBytes
@@ -351,5 +354,10 @@ Lotion.connect = function(GCI, opts = {}) {
     })
   })
 }
+
+process.on('unhandledRejection', e => {
+  console.log('error')
+  console.log(e)
+})
 
 module.exports = Lotion
