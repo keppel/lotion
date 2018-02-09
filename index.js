@@ -209,7 +209,7 @@ function Lotion(opts = {}) {
         nodeInfo.GCI = GCI
         let txServer = TxServer({
           tendermintRpcUrl,
-          appState,
+          store,
           nodeInfo,
           txEndpoints,
           port: txServerPort
@@ -245,6 +245,7 @@ function Lotion(opts = {}) {
 let tendermint = require('tendermint')
 let txEncoding = require('./lib/tx-encoding.js')
 let { parse } = require('./lib/json.js')
+let Proxmise = require('proxmise')
 
 function waitForHeight(height, lc) {
   return new Promise((resolve, reject) => {
@@ -301,7 +302,8 @@ Lotion.connect = function(GCI, opts = {}) {
     rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
       bus.emit('block')
     })
-    resolve({
+
+    let methods = {
       getState: async function(path = '') {
         let queryResponse = await axios.get(
           `${fullNodeRpcAddress}/abci_query?path="${path}"`
@@ -314,6 +316,11 @@ Lotion.connect = function(GCI, opts = {}) {
         let verifiedValue = merk.verify(rootHash, proof, path)
         return verifiedValue
       },
+
+      state: Proxmise(async path => {
+        return await methods.getState(path.join('.'))
+      }),
+
       send: function(tx) {
         return new Promise((resolve, reject) => {
           let nonce = Math.floor(Math.random() * (2 << 12))
@@ -345,7 +352,9 @@ Lotion.connect = function(GCI, opts = {}) {
             })
         })
       }
-    })
+    }
+
+    resolve(methods)
   })
 }
 
