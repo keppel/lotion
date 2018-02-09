@@ -147,8 +147,6 @@ Here are the default options for `opts` which you can override:
   peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified. 
   logTendermint: false, // if true, shows all output from the underlying tendermint process          
   createEmptyBlocks: true, // if false, Tendermint will not create empty blocks which may result in a reduced blockchain file size        
-  lite: false,          // whether to run in light client mode. if true, must also specify a target.
-  target: null,         // '<host>:<rpcport>' of target to connect to and light client verify
   p2pPort: 46658,       // port to use for tendermint peer connections      
   tendermintPort: 46657 // port to use for tendermint rpc
 }
@@ -209,15 +207,6 @@ $ curl http://localhost:3000/txs -d '{}'
 # {"state": {"count": 1},"ok": true}
 ```
 
-### `GET /txs`
-
-Returns an array of transactions that have been committed to the blockchain.
-
-```bash
-$ curl http://localhost:3000/txs
-# [{"count": 0}]
-```
-
 ### `GET /info`
 
 Get some info about the node, such as its validator public key.
@@ -239,16 +228,16 @@ Lotion apps each have a unique global chain identifier (GCI). You can light clie
 let { connect } = require('lotion')
 let GCI = '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
 
-let { getState, send } = await connect(GCI)
+let { state, send } = await connect(GCI)
 
-let state = await getState()
-console.log(state) // { count: 0 }
+let count = await state.count
+console.log(count) // 0
 
 let result = await send({ nonce: 0 })
 console.log(result) // { height: 42, ok: true }
 
-state = await getState()
-console.log(state) // { count: 1 }
+count = await state.count
+console.log(count) // 1
 ```
 
 Under the hood, the GCI is used to discover and torrent the app's genesis.json.

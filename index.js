@@ -18,6 +18,7 @@ let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
 let getPeerGCI = require('./lib/gci-get-peer.js')
 let os = require('os')
 let axios = require('axios')
+let merk = require('merk')
 let { EventEmitter } = require('events')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
@@ -40,9 +41,10 @@ function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
-  let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
-    ? true
-    : opts.createEmptyBlocks
+  let createEmptyBlocks =
+    typeof opts.createEmptyBlocks === 'undefined'
+      ? true
+      : opts.createEmptyBlocks
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
@@ -59,13 +61,12 @@ function Lotion(opts = {}) {
   let keys =
     typeof opts.keys === 'string' &&
     JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-  let genesis = typeof opts.genesis === 'string'
-    ? JSON.parse(getGenesis(opts.genesis))
-    : opts.genesis
+  let genesis =
+    typeof opts.genesis === 'string'
+      ? JSON.parse(getGenesis(opts.genesis))
+      : opts.genesis
 
   let appState = Object.assign({}, initialState)
-  let txCache = level({ db: memdown, valueEncoding: 'json' })
-  let txStats = { txCountNetwork: 0 }
   let bus = new EventEmitter()
   let appInfo
   let abciServer
@@ -137,25 +138,6 @@ function Lotion(opts = {}) {
           opts.tendermintPort,
           opts.abciPort
         )
-
-        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
-
-        initializerMiddleware.forEach(initializer => {
-          initializer(appState)
-        })
-        let initialAppHash = getRoot(appState).toString('hex')
-        abciServer = ABCIServer({
-          txMiddleware,
-          blockMiddleware,
-          queryMiddleware,
-          initializerMiddleware,
-          appState,
-          txCache,
-          txStats,
-          initialAppHash
-        })
-        abciServer.listen(abciPort, 'localhost')
-
         let lotionPath = LOTION_HOME + '/networks/' + networkId
         if (devMode) {
           lotionPath += Math.floor(Math.random() * 1e9)
@@ -166,6 +148,27 @@ function Lotion(opts = {}) {
           })
         }
         await fs.mkdirp(lotionPath)
+
+        // initialize merk store
+        let merkDb = level(lotionPath + '/merk')
+        let store = await merk(merkDb)
+
+        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
+
+        initializerMiddleware.forEach(initializer => {
+          initializer(appState)
+        })
+        Object.assign(store, appState)
+        let initialAppHash = (await getRoot(store)).toString('hex')
+        abciServer = ABCIServer({
+          txMiddleware,
+          blockMiddleware,
+          queryMiddleware,
+          initializerMiddleware,
+          store,
+          initialAppHash
+        })
+        abciServer.listen(abciPort, 'localhost')
 
         try {
           tendermint = await Tendermint({
@@ -206,11 +209,9 @@ function Lotion(opts = {}) {
         nodeInfo.GCI = GCI
         let txServer = TxServer({
           tendermintRpcUrl,
-          appState,
+          store,
           nodeInfo,
           txEndpoints,
-          txCache,
-          txStats,
           port: txServerPort
         })
         txHTTPServer = txServer.listen(txServerPort, 'localhost', function() {
@@ -244,11 +245,12 @@ function Lotion(opts = {}) {
 let tendermint = require('tendermint')
 let txEncoding = require('./lib/tx-encoding.js')
 let { parse } = require('./lib/json.js')
+let Proxmise = require('proxmise')
 
 function waitForHeight(height, lc) {
   return new Promise((resolve, reject) => {
     function handleUpdate(header) {
-      if (header.height >= height) {
+      if (header.height > height) {
         resolve()
         lc.removeListener('update', handleUpdate)
       }
@@ -294,30 +296,31 @@ Lotion.connect = function(GCI, opts = {}) {
 
     lc.on('update', function(header, commit, validators) {
       let appHash = header.app_hash
-      appHashByHeight[header.height] = appHash
+      appHashByHeight[header.height - 1] = appHash
     })
     let bus = new EventEmitter()
     rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
       bus.emit('block')
     })
-    resolve({
-      getState: async function() {
-        let queryResponse = await axios
-          .get(`${fullNodeRpcAddress}/abci_query?data=""&opts={"trusted":true}`)
-          .catch(e => {
-            console.log(e)
-          })
-        let resp = queryResponse.data.result.response
-        let value = parse(Buffer.from(resp.value, 'hex').toString())
-        await waitForHeight(resp.height, lc)
-        let responseAppHash = getRoot(value).toString('hex').toUpperCase()
 
-        if (responseAppHash === appHashByHeight[resp.height]) {
-          return value
-        } else {
-          throw Error('invalid state from full node')
-        }
+    let methods = {
+      getState: async function(path = '') {
+        let queryResponse = await axios.get(
+          `${fullNodeRpcAddress}/abci_query?path="${path}"`
+        )
+        let resp = queryResponse.data.result.response
+        resp.height = Number(resp.height)
+        let proof = parse(Buffer.from(resp.proof, 'hex').toString())
+        await waitForHeight(resp.height, lc)
+        let rootHash = appHashByHeight[resp.height].toLowerCase()
+        let verifiedValue = merk.verify(rootHash, proof, path)
+        return verifiedValue
       },
+
+      state: Proxmise(async path => {
+        return await methods.getState(path.join('.'))
+      }),
+
       send: function(tx) {
         return new Promise((resolve, reject) => {
           let nonce = Math.floor(Math.random() * (2 << 12))
@@ -325,7 +328,10 @@ Lotion.connect = function(GCI, opts = {}) {
 
           axios
             .get(
-              `${fullNodeRpcAddress.replace('ws:', 'http:')}/broadcast_tx_commit`,
+              `${fullNodeRpcAddress.replace(
+                'ws:',
+                'http:'
+              )}/broadcast_tx_commit`,
               {
                 params: {
                   tx: txBytes
@@ -342,10 +348,13 @@ Lotion.connect = function(GCI, opts = {}) {
             .catch(e => {
               console.log('error broadcasting transaction:')
               console.log(e)
+              reject(e)
             })
         })
       }
-    })
+    }
+
+    resolve(methods)
   })
 }
 
