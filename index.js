@@ -1,6 +1,5 @@
 let getPort = require('get-port')
 let fs = require('fs-extra')
-let memdown = require('memdown')
 let level = require('level')
 let ABCIServer = require('./lib/abci-app.js')
 let TxServer = require('./lib/tx-server.js')
