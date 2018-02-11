@@ -110,22 +110,20 @@ test('error handling', async t => {
   t.end()
 })
 
-test('custom endpoint', async t => {
-  let result = await axios.post('http://localhost:3000/txs/special', {})
-  t.equal(result.data.state.specialTxCount, 1)
-  t.end()
-})
-
 test('deeply nested state mutations', async t => {
   let result = await axios.post('http://localhost:3000/txs', {
     mutateDeep: true
   })
-  t.equal(result.data.state.accounts.foo.balance, 40)
-  t.equal(result.data.state.accounts.foo.otherBalance, undefined)
+  let state = await axios
+    .get('http://localhost:3000/state')
+    .then(res => res.data)
+  t.equal(state.accounts.foo.balance, 40)
+  t.equal(state.accounts.foo.otherBalance, undefined)
   result = await axios.post('http://localhost:3000/txs', {
     mutateDeep: true
   })
-  t.equal(result.data.state.accounts.foo.otherBalance, 60)
+  state = await axios.get('http://localhost:3000/state').then(res => res.data)
+  t.equal(state.accounts.foo.otherBalance, 60)
   t.end()
 })
 
