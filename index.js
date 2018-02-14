@@ -1,7 +1,7 @@
 let getPort = require('get-port')
 let fs = require('fs-extra')
-let memdown = require('memdown')
 let level = require('level')
+let { join } = require('path')
 let ABCIServer = require('./lib/abci-app.js')
 let TxServer = require('./lib/tx-server.js')
 let Tendermint = require('./lib/tendermint.js')
@@ -138,7 +138,7 @@ function Lotion(opts = {}) {
           opts.tendermintPort,
           opts.abciPort
         )
-        let lotionPath = LOTION_HOME + '/networks/' + networkId
+        let lotionPath = join(LOTION_HOME, 'networks', networkId)
         if (devMode) {
           lotionPath += Math.floor(Math.random() * 1e9)
           rimraf.sync(lotionPath)
@@ -150,7 +150,7 @@ function Lotion(opts = {}) {
         await fs.mkdirp(lotionPath)
 
         // initialize merk store
-        let merkDb = level(lotionPath + '/merk')
+        let merkDb = level(join(lotionPath, 'merk'))
         let store = await merk(merkDb)
 
         let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
@@ -223,7 +223,7 @@ function Lotion(opts = {}) {
             GCI: GCI,
             p2pPort,
             lotionPath,
-            genesisPath: lotionPath + '/genesis.json',
+            genesisPath: join(lotionPath, 'genesis.json'),
             lite
           }
 
