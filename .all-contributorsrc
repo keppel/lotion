@@ -57,6 +57,27 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "spentak",
+      "name": "Mark Price",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/758121?v=4",
+      "profile": "http://spentak.com",
+      "contributions": [
+        "doc",
+        "tutorial",
+        "example",
+        "video"
+      ]
+    },
+    {
+      "login": "evanmayo",
+      "name": "Evan Leong",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/14792822?v=4",
+      "profile": "http://www.fountapp.com",
+      "contributions": [
+        "design"
+      ]
     }
   ]
 }
