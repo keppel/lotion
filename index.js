@@ -246,6 +246,7 @@ let tendermint = require('tendermint')
 let txEncoding = require('./lib/tx-encoding.js')
 let { parse } = require('./lib/json.js')
 let Proxmise = require('proxmise')
+let get = require('lodash.get')
 
 function waitForHeight(height, lc) {
   return new Promise((resolve, reject) => {
@@ -306,15 +307,25 @@ Lotion.connect = function(GCI, opts = {}) {
     let methods = {
       getState: async function(path = '') {
         let queryResponse = await axios.get(
-          `${fullNodeRpcAddress}/abci_query?path="${path}"`
+          `${fullNodeRpcAddress}/abci_query?path=""`
         )
         let resp = queryResponse.data.result.response
         resp.height = Number(resp.height)
-        let proof = parse(Buffer.from(resp.proof, 'hex').toString())
+        let value
+        try {
+          value = parse(Buffer.from(resp.value, 'hex').toString())
+        } catch (e) {
+          throw new Error('invalid json in query response')
+        }
         await waitForHeight(resp.height, lc)
-        let rootHash = appHashByHeight[resp.height].toLowerCase()
-        let verifiedValue = merk.verify(rootHash, proof, path)
-        return verifiedValue
+        let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+        let rootHash = (await getRoot(value)).toString('hex')
+        if (rootHash !== expectedRootHash) {
+          throw new Error(
+            `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
+          )
+        }
+        return path ? get(value, path) : value
       },
 
       state: Proxmise(async path => {
