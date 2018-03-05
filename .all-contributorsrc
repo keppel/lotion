@@ -78,6 +78,26 @@
       "contributions": [
         "design"
       ]
+    },
+    {
+      "login": "Chjango",
+      "name": "Chjango Unchained",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/8525850?v=4",
+      "profile": "https://cosmos.network",
+      "contributions": [
+        "blog",
+        "eventOrganizing"
+      ]
+    },
+    {
+      "login": "SaifRehman",
+      "name": "SaifRehman",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/18755233?v=4",
+      "profile": "https://github.com/SaifRehman",
+      "contributions": [
+        "example"
+      ]
     }
-  ]
+  ],
+  "repoType": "github"
 }
