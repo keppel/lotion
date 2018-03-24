@@ -263,6 +263,7 @@ function waitForHeight(height, lc) {
 
 Lotion.connect = function(GCI, opts = {}) {
   return new Promise(async (resolve, reject) => {
+    let bus = new EventEmitter()
     let nodes = opts.nodes || []
     // get genesis
     let genesis = opts.genesis
@@ -295,16 +296,19 @@ Lotion.connect = function(GCI, opts = {}) {
     let rpc = tendermint.RpcClient(fullNodeRpcAddress)
     let appHashByHeight = {}
 
+    lc.on('error', e => bus.emit('error', e))
+    rpc.on('error', e => bus.emit('error', e))
+
     lc.on('update', function(header, commit, validators) {
       let appHash = header.app_hash
       appHashByHeight[header.height - 1] = appHash
     })
-    let bus = new EventEmitter()
     rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
       bus.emit('block')
     })
 
     let methods = {
+      bus,
       getState: async function(path = '') {
         let queryResponse = await axios.get(
           `${fullNodeRpcAddress}/abci_query?path=""`
