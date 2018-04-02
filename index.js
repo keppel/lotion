@@ -59,8 +59,9 @@ function Lotion(opts = {}) {
     Tendermint = TendermintLite
   }
   let keys =
-    typeof opts.keys === 'string' &&
-    JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
+    typeof opts.keys === 'string'
+      ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
+      : opts.keys
   let genesis =
     typeof opts.genesis === 'string'
       ? JSON.parse(getGenesis(opts.genesis))
