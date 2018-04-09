@@ -66,7 +66,10 @@ test('parse', (t) => {
 
 test('convertBuffersToBase64', (t) => {
   t.test('Buffers get encoded to base64 strings', (t) => {
-    let obj = { data: Buffer.from('base64 me plz'), foo: 'bar' }
+    let obj = {
+      data: Buffer.from('base64 me plz'),
+      foo: 'bar'
+    }
     json.convertBuffersToBase64(obj)
     t.equal(
       obj.data,
@@ -77,7 +80,11 @@ test('convertBuffersToBase64', (t) => {
   })
 
   t.test('Buffer.toJSON() values get encoded to base64 strings', (t) => {
-    let obj = { data: Buffer.from('base64 me plz').toJSON(), foo: 'bar' }
+    let obj = {
+      data: Buffer.from('base64 me plz').toJSON(),
+      foo: 'bar',
+      x: null
+    }
     json.convertBuffersToBase64(obj)
     t.equal(
       obj.data,
@@ -96,6 +103,7 @@ test('convertBase64ToBuffers', (t) => {
       data: ':base64:YmFzZTY0IG1lIHBseg==',
       foo: 'bar',
       baz: 123,
+      x: null,
       recursive: { data: ':base64:YmFzZTY0IG1lIHBseg==' }
     }
     json.convertBase64ToBuffers(obj)
