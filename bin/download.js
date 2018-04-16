@@ -1,15 +1,17 @@
-let axios = require('axios')
 let tendermintUrl = require('./binaries').tendermint[process.platform]
 let fs = require('fs')
 let unzip = require('unzip')
+let wget = require('node-wget')
 
-axios({
-  url: tendermintUrl,
-  method: 'get',
-  responseType: 'stream'
-}).then(function(response) {
-  let ws = fs.createWriteStream(__dirname + '/tendermint', { mode: 0o777 })
-  response.data.pipe(unzip.Parse()).on('entry', function(entry) {
-    entry.pipe(ws)
-  })
+wget({url: tendermintUrl, dest: __dirname + "/tendermint.zip"}, (e) => {
+  if (e != null) {
+    console.log(e)
+  } else {
+    fs.createReadStream(__dirname + '/tendermint.zip')
+      .pipe(unzip.Parse())
+      .on('entry', function (entry) {
+        entry.pipe(fs.createWriteStream(__dirname + '/tendermint',  { mode: 0o777 }));
+        fs.unlink(__dirname + '/tendermint.zip')
+      });
+  }
 })
