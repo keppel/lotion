@@ -1,30 +1,20 @@
 {
-  "_from": "git+ssh://git@github.com/AltCoinExchange/lotion.git",
-  "_id": "lotion@0.1.18",
-  "_inBundle": false,
-  "_location": "/lotion",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "git",
-    "raw": "lotion@git+ssh://git@github.com/AltCoinExchange/lotion.git",
-    "name": "lotion",
-    "escapedName": "lotion",
-    "rawSpec": "git+ssh://git@github.com/AltCoinExchange/lotion.git",
-    "saveSpec": "git+ssh://git@github.com/AltCoinExchange/lotion.git",
-    "fetchSpec": "ssh://git@github.com/AltCoinExchange/lotion.git",
-    "gitCommittish": null
+  "name": "lotion",
+  "version": "0.1.19",
+  "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
   },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "git+ssh://git@github.com/AltCoinExchange/lotion.git#01fc7c0c42b93b577f1a8575696ca44a7d96224b",
-  "_spec": "lotion@git+ssh://git@github.com/AltCoinExchange/lotion.git",
-  "_where": "/Users/djenadrazic/MachinezDesign/AltCoin/altcoin-node",
-  "author": {
-    "name": "Judd Keppel",
-    "email": "kepzorz@gmail.com"
+  "scripts": {
+    "test": "nyc tape test/json.js test/counter.js",
+    "install": "node bin/download.js",
+    "contributors:add": "all-contributors add",
+    "contributors:generate": "all-contributors generate"
   },
-  "bundleDependencies": false,
+  "keywords": [],
+  "author": "Judd Keppel <kepzorz@gmail.com>",
+  "license": "ISC",
   "dependencies": {
     "axios": "^0.16.2",
     "body-parser": "^1.17.2",
@@ -38,7 +28,6 @@
     "express-http-proxy": "^1.0.7",
     "fs-extra": "^5.0.0",
     "get-port": "^3.1.0",
-    "int64-buffer": "^0.1.10",
     "varint": "git+ssh://git@github.com:AltCoinExchange/varint.git",
     "js-wire": "~0.0.3",
     "json-stable-stringify": "^1.0.1",
@@ -52,27 +41,11 @@
     "unzip": "^0.1.11",
     "varstruct": "^6.1.1"
   },
-  "deprecated": false,
-  "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "devDependencies": {
     "all-contributors-cli": "^4.9.1",
     "nyc": "^11.3.0",
     "rimraf": "^2.6.2",
     "tape": "^4.8.0",
     "tape-promise": "^2.0.1"
-  },
-  "directories": {
-    "example": "example"
-  },
-  "keywords": [],
-  "license": "ISC",
-  "main": "index.js",
-  "name": "lotion",
-  "scripts": {
-    "contributors:add": "all-contributors add",
-    "contributors:generate": "all-contributors generate",
-    "install": "node bin/download.js",
-    "test": "nyc tape test/json.js test/counter.js"
-  },
-  "version": "0.1.19"
+  }
 }
