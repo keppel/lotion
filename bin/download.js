@@ -3,7 +3,7 @@ let fs = require('fs')
 let unzip = require('unzip')
 let wget = require('node-wget')
 
-wget({url: tendermintUrl, dest: "tendermint.zip"}, (e) => {
+wget({url: tendermintUrl, dest: __dirname + "/tendermint.zip"}, (e) => {
   if (e != null) {
     console.log(e)
   } else {
