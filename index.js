@@ -309,6 +309,7 @@ Lotion.connect = function(GCI, opts = {}) {
 
     let methods = {
       bus,
+      rpc,
       getState: async function(path = '') {
         let queryResponse = await axios.get(
           `${fullNodeRpcAddress}/abci_query?path=""`
