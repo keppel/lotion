@@ -1,6 +1,6 @@
 {
   "name": "lotion",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "index.js",
   "directories": {
