@@ -9,7 +9,9 @@ let app = require('../../')({
   peers: ['localhost:46660'],
   tendermintPort: 46657,
   p2pPort: 46661,
-  devMode: true
+  devMode: true,
+  createEmptyBlocks: true,
+  createEmptyBlocksInterval: 5,
 })
 
 app.use((state, tx) => {
@@ -17,9 +19,9 @@ app.use((state, tx) => {
   state.count++
 })
 
-app.useBlock(state => {
-  state.blockCount++
-})
+// app.useBlock(state => {
+//   state.blockCount++
+// })
 
 app.listen(port).then(({ GCI }) => {
   console.log(GCI)
