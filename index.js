@@ -46,7 +46,6 @@ function Lotion(opts = {}) {
       ? true
       : opts.createEmptyBlocks
   let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
-  console.log("Interval:" + createEmptyBlocksInterval)
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
