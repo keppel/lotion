@@ -45,6 +45,8 @@ function Lotion(opts = {}) {
     typeof opts.createEmptyBlocks === 'undefined'
       ? true
       : opts.createEmptyBlocks
+  let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
+  console.log("Interval:" + createEmptyBlocksInterval)
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
@@ -178,6 +180,7 @@ function Lotion(opts = {}) {
             p2pPort,
             logTendermint,
             createEmptyBlocks,
+            createEmptyBlocksInterval,
             networkId,
             peers,
             genesis,
