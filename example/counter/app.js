@@ -19,9 +19,9 @@ app.use((state, tx) => {
   state.count++
 })
 
-app.useBlock(state => {
-  state.blockCount++
-})
+// app.useBlock(state => {
+//   state.blockCount++
+// })
 
 app.listen(port).then(({ GCI }) => {
   console.log(GCI)
