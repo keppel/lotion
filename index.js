@@ -20,8 +20,14 @@ let os = require('os')
 let axios = require('axios')
 let merk = require('merk')
 let { EventEmitter } = require('events')
+let isElectron = require('is-electron')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
+
+if (isElectron()) {
+  axios.defaults.adapter = require('axios/lib/adapters/http')
+}
+
 
 async function getPorts(peeringPort, rpcPort, abciAppPort) {
   let p2pPort =
