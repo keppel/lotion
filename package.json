@@ -30,7 +30,6 @@
     "fs-extra": "^5.0.0",
     "get-port": "^3.1.0",
     "js-wire": "~0.0.3",
-    "json-stable-stringify": "^1.0.1",
     "jsondiffpatch": "^0.2.5",
     "level": "^2.1.2",
     "lodash.get": "^4.4.2",
