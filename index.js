@@ -20,8 +20,14 @@ let os = require('os')
 let axios = require('axios')
 let merk = require('merk')
 let { EventEmitter } = require('events')
+let isElectron = require('is-electron')
 
 const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
+
+if (isElectron()) {
+  axios.defaults.adapter = require('axios/lib/adapters/http')
+}
+
 
 async function getPorts(peeringPort, rpcPort, abciAppPort) {
   let p2pPort =
@@ -59,8 +65,9 @@ function Lotion(opts = {}) {
     Tendermint = TendermintLite
   }
   let keys =
-    typeof opts.keys === 'string' &&
-    JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
+    typeof opts.keys === 'string'
+      ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
+      : opts.keys
   let genesis =
     typeof opts.genesis === 'string'
       ? JSON.parse(getGenesis(opts.genesis))
@@ -248,15 +255,20 @@ let { parse } = require('deterministic-json')
 let Proxmise = require('proxmise')
 let get = require('lodash.get')
 
-function waitForHeight(height, lc) {
-  return new Promise((resolve, reject) => {
-    function handleUpdate(header) {
-      if (header.height > height) {
-        resolve()
-        lc.removeListener('update', handleUpdate)
-      }
+function waitForHeight(resp, lc, opts) {
+    return new Promise((resolve, reject) => {
+        function handleUpdate(header) {
+        if (header.height > resp.height) {
+            resolve(false)
+            lc.removeListener('update', handleUpdate)
+        }
+        if (opts.liteTimeout) {
+            setTimeout(() => {
+                resolve(true)
+            lc.removeListener('update', handleUpdate)
+        }, opts.liteTimeout)
+        }
     }
-
     lc.on('update', handleUpdate)
   })
 }
@@ -309,6 +321,7 @@ Lotion.connect = function(GCI, opts = {}) {
 
     let methods = {
       bus,
+      rpc,
       getState: async function(path = '') {
         let queryResponse = await axios.get(
           `${fullNodeRpcAddress}/abci_query?path=""`
@@ -321,13 +334,17 @@ Lotion.connect = function(GCI, opts = {}) {
         } catch (e) {
           throw new Error('invalid json in query response')
         }
-        await waitForHeight(resp.height, lc)
-        let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
-        let rootHash = (await getRoot(value)).toString('hex')
-        if (rootHash !== expectedRootHash) {
-          throw new Error(
-            `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
-          )
+        if (!opts.lite) {
+            let timeOuted = await waitForHeight(resp, lc, opts)
+            if (!timeOuted) {
+                let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+                let rootHash = (await getRoot(value)).toString('hex')
+                if (rootHash !== expectedRootHash) {
+                    throw new Error(
+                        `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
+                    )
+                }
+            }
         }
         return path ? get(value, path) : value
       },

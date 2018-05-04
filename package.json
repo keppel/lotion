@@ -1,6 +1,6 @@
 {
   "name": "lotion",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "index.js",
   "directories": {
@@ -29,6 +29,7 @@
     "express-http-proxy": "^1.0.7",
     "fs-extra": "^5.0.0",
     "get-port": "^3.1.0",
+    "is-electron": "^2.1.0",
     "js-wire": "~0.0.3",
     "jsondiffpatch": "^0.2.5",
     "level": "^2.1.2",
