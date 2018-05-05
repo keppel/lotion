@@ -75,8 +75,8 @@ test('send a tx', async t => {
     .post('http://localhost:3000/txs', {})
     .then(res => res.data.result)
 
-  t.equal(result.check_tx.code, 0, 'no check_tx error code')
-  t.equal(result.deliver_tx.code, 0, 'no deliver_tx error code')
+  t.equal(result.check_tx.code || 0, 0, 'no check_tx error code')
+  t.equal(result.deliver_tx.code || 0, 0, 'no deliver_tx error code')
 
   // fetch state again
   let state = await getState()
@@ -138,7 +138,7 @@ test("tx that doesn't mutate state", async t => {
 
 test('node info endpoint', async t => {
   let result = await axios.get('http://localhost:3000/info')
-  t.equal(result.data.pubKey.length, 64)
+  t.equal(Buffer.from(result.data.pubKey, 'base64').length, 32)
   t.end()
 })
 
