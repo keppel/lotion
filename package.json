@@ -16,6 +16,7 @@
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "abci": "^2.1.0",
     "axios": "^0.16.2",
     "body-parser": "^1.17.2",
     "bytebuffer": "^5.0.1",
