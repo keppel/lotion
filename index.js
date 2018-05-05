@@ -207,6 +207,7 @@ function Lotion(opts = {}) {
           GCI = getGCIFromGenesis(genesisJson)
           serveGenesisGCI(GCI, genesisJson)
         }
+
         await tendermint.synced
         if (!lite) {
           announceSelfAsFullNode({ GCI, tendermintPort })
