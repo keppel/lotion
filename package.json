@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "test": "nyc tape test/json.js test/counter.js",
+    "test": "nyc tape test/counter.js",
     "install": "node bin/download.js",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
@@ -21,6 +21,7 @@
     "bytebuffer": "^5.0.1",
     "cors": "^2.8.4",
     "dat-swarm-defaults": "^1.0.0",
+    "deterministic-json": "^1.0.4",
     "discovery-channel": "^5.4.6",
     "discovery-server": "^1.1.0",
     "execa": "^0.8.0",
@@ -30,7 +31,6 @@
     "get-port": "^3.1.0",
     "is-electron": "^2.1.0",
     "js-wire": "~0.0.3",
-    "json-stable-stringify": "^1.0.1",
     "jsondiffpatch": "^0.2.5",
     "level": "^2.1.2",
     "lodash.get": "^4.4.2",

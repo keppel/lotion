@@ -251,7 +251,7 @@ function Lotion(opts = {}) {
 
 let tendermint = require('tendermint')
 let txEncoding = require('./lib/tx-encoding.js')
-let { parse } = require('./lib/json.js')
+let { parse } = require('deterministic-json')
 let Proxmise = require('proxmise')
 let get = require('lodash.get')
 
