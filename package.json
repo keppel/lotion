@@ -41,7 +41,7 @@
     "proxmise": "^1.0.0",
     "tendermint": "^3.1.2",
     "unzip": "^0.1.11",
-    "varint": "git+ssh://git@github.com:AltCoinExchange/varint.git",
+    "varint": "git+ssh://git@github.com/AltCoinExchange/varint.git",
     "varstruct": "^6.1.1"
   },
   "devDependencies": {
