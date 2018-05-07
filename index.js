@@ -302,14 +302,18 @@ Lotion.connect = function(GCI, opts = {}) {
     let rpc = tendermint.RpcClient(fullNodeRpcAddress)
     let appHashByHeight = {}
 
-    lc.on('error', e => bus.emit('error', e))
-    rpc.on('error', e => bus.emit('error', e))
+    lc.on('error', e => {
+      bus.emit('error', e)
+    })
+    rpc.on('error', e => {
+      bus.emit('error', e)
+    })
 
     lc.on('update', function(header, commit, validators) {
       let appHash = header.app_hash
       appHashByHeight[header.height - 1] = appHash
     })
-    rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
+    rpc.subscribe({ query: "tm.event='NewBlockHeader'" }, function() {
       bus.emit('block')
     })
 
@@ -317,29 +321,29 @@ Lotion.connect = function(GCI, opts = {}) {
       bus,
       getState: async function(path = '') {
         let queryResponse = await axios.get(
-          `${fullNodeRpcAddress}/abci_query?path=""`
+          `${fullNodeRpcAddress}/abci_query?path="${path}"`
         )
         let resp = queryResponse.data.result.response
         resp.height = Number(resp.height)
         let value
         try {
-          value = parse(Buffer.from(resp.value, 'base64').toString())
+          value = JSON.parse(Buffer.from(resp.value, 'base64').toString())
         } catch (e) {
           throw new Error('invalid json in query response')
         }
         if (!opts.lite) {
-            let timeOuted = await waitForHeight(resp, lc, opts)
-            if (!timeOuted) {
-                let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
-                let rootHash = (await getRoot(value)).toString('hex')
-                if (rootHash !== expectedRootHash) {
-                    throw new Error(
-                        `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
-                    )
-                }
+          let timeOuted = await waitForHeight(resp, lc, opts)
+          if (!timeOuted) {
+            let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+            let rootHash = (await getRoot(value)).toString('hex')
+            if (rootHash !== expectedRootHash) {
+              throw new Error(
+                `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
+              )
             }
+          }
         }
-        return path ? get(value, path) : value
+        return value
       },
 
       state: Proxmise(async path => {
