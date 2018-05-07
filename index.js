@@ -323,7 +323,7 @@ Lotion.connect = function(GCI, opts = {}) {
         resp.height = Number(resp.height)
         let value
         try {
-          value = parse(Buffer.from(resp.value, 'hex').toString())
+          value = parse(Buffer.from(resp.value, 'base64').toString())
         } catch (e) {
           throw new Error('invalid json in query response')
         }
