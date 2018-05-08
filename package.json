@@ -8,7 +8,6 @@
   },
   "scripts": {
     "test": "nyc tape test/counter.js",
-    "install": "node bin/download.js",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
@@ -25,7 +24,6 @@
     "deterministic-json": "^1.0.4",
     "discovery-channel": "^5.4.6",
     "discovery-server": "^1.1.0",
-    "execa": "^0.8.0",
     "express": "^4.15.4",
     "express-http-proxy": "^1.0.7",
     "fs-extra": "^5.0.0",
@@ -39,7 +37,7 @@
     "protobufjs": "^6.8.3",
     "proxmise": "^1.0.0",
     "tendermint": "^3.1.2",
-    "unzip": "^0.1.11",
+    "tendermint-node": "^1.1.0",
     "varstruct": "^6.1.1"
   },
   "devDependencies": {
