@@ -250,18 +250,18 @@ let Proxmise = require('proxmise')
 let get = require('lodash.get')
 
 function waitForHeight(resp, lc, opts) {
-    return new Promise((resolve, reject) => {
-        function handleUpdate(header) {
-        if (header.height > resp.height) {
-            resolve(false)
-            lc.removeListener('update', handleUpdate)
-        }
-        if (opts.liteTimeout) {
-            setTimeout(() => {
-                resolve(true)
-            lc.removeListener('update', handleUpdate)
+  return new Promise((resolve, reject) => {
+    function handleUpdate(header) {
+      if (header.height > resp.height) {
+        resolve(false)
+        lc.removeListener('update', handleUpdate)
+      }
+      if (opts.liteTimeout) {
+        setTimeout(() => {
+          resolve(true)
+          lc.removeListener('update', handleUpdate)
         }, opts.liteTimeout)
-        }
+      }
     }
     lc.on('update', handleUpdate)
   })
@@ -298,30 +298,38 @@ Lotion.connect = function(GCI, opts = {}) {
       commit: null,
       header: { height: 1, chain_id: genesis.chain_id }
     }
-    let lc = tendermint(fullNodeRpcAddress, clientState)
-    let rpc = tendermint.RpcClient(fullNodeRpcAddress)
+
+    let lc = null
+    if (!opts.lite) {
+      lc = tendermint(fullNodeRpcAddress, clientState)
+      lc.on('error', e => {
+        bus.emit('error', e)
+      })
+      lc.on('update', function(header, commit, validators) {
+        let appHash = header.app_hash
+        appHashByHeight[header.height - 1] = appHash
+      })
+    }
+
+    let rpc = tendermint.RpcClient(fullNodeRpcAddress.replace('http:', 'ws:'))
     let appHashByHeight = {}
 
-    lc.on('error', e => {
-      bus.emit('error', e)
-    })
     rpc.on('error', e => {
       bus.emit('error', e)
     })
 
-    lc.on('update', function(header, commit, validators) {
-      let appHash = header.app_hash
-      appHashByHeight[header.height - 1] = appHash
-    })
-    rpc.subscribe({ query: "tm.event='NewBlockHeader'" }, function() {
-      bus.emit('block')
-    })
+    if (!opts.lite) {
+      rpc.subscribe({ query: "tm.event='NewBlockHeader'" }, function() {
+        bus.emit('block')
+      })
+    }
 
     let methods = {
       bus,
       getState: async function(path = '') {
+        let rpcAddr = fullNodeRpcAddress.replace('http:', 'ws:')
         let queryResponse = await axios.get(
-          `${fullNodeRpcAddress}/abci_query?path="${path}"`
+          `${rpcAddr}/abci_query?path="${path}"`
         )
         let resp = queryResponse.data.result.response
         resp.height = Number(resp.height)
@@ -343,6 +351,14 @@ Lotion.connect = function(GCI, opts = {}) {
             }
           }
         }
+
+        // TODO: Call unsubscribe
+        //await rpc.callWs("unsubscribe_all")
+
+        // await axios.get(
+        //   `${rpcAddr}/unsubscibe_all`
+        // )
+        // rpc.close()
         return value
       },
 
