@@ -1,16 +1,15 @@
-let initialState = { count: 0, blockCount: 0, foo: { bar: { beep: 'boop' } }, height: 0, txHeight: 0, lastMatch: 0 }
+let initialState = { count: 0, blockCount: 0, foo: { bar: { beep: 'boop' } }, height: 0, txHeight: 0, lastMatch: 0  }
 let axios = require('axios')
 
-let port = 3000
+let port = 3001
 let opts = {
   initialState,
   genesis: 'genesis.json',
-  keys: 'keys.json',
+  keys: 'keys2.json',
   logTendermint: true,
-  peers: ['localhost:46660'],
-  tendermintPort: 46657,
-  p2pPort: 46661,
-  abciPort: 46662,
+  peers: ['localhost:46661'],
+  tendermintPort: 46658,
+  p2pPort: 46660,
   devMode: true,
   createEmptyBlocks: true,
   createEmptyBlocksInterval: 5,
