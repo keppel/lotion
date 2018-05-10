@@ -252,7 +252,15 @@ let app = require('lotion')({ initialState: { count: 0 } })
 let { GCI } = await app.listen(3000)
 console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
 ```
-
+## FAQs
+### Is there a size limit to how big the state can become?
+```
+initialState [];
+app.use(function (state, tx) {
+   state.push(tx);
+})
+```
+A:???
 ## Links
 
 - go read more at [https://lotionjs.com](https://lotionjs.com)!
