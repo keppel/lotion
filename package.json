@@ -16,7 +16,6 @@
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "altcoin-plasma-sdk": "git+ssh://git@github.com/AltCoinExchange/altcoin-plasma-sdk.git",
     "axios": "^0.16.2",
     "body-parser": "^1.17.2",
     "bytebuffer": "^5.0.1",
