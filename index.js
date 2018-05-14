@@ -28,7 +28,6 @@ if (isElectron()) {
   axios.defaults.adapter = require('axios/lib/adapters/http')
 }
 
-
 async function getPorts(peeringPort, rpcPort, abciAppPort) {
   let p2pPort =
     process.env.P2P_PORT || peeringPort || (await getPort(peeringPort))
