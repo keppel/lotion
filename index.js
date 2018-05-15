@@ -253,7 +253,7 @@ let get = require('lodash.get')
 function waitForHeight(height, lc) {
   return new Promise((resolve, reject) => {
     function handleUpdate(header) {
-      if (header.height > height) {
+      if (header.height >= height) {
         resolve()
         lc.removeListener('update', handleUpdate)
       }
@@ -323,8 +323,14 @@ Lotion.connect = function(GCI, opts = {}) {
         } catch (e) {
           throw new Error('invalid json in query response')
         }
-        await waitForHeight(resp.height, lc)
-        let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+
+        let lcState = lc.state()
+
+        if (lcState.header.height != resp.height) {
+          await waitForHeight(resp.height, lc)
+        }
+
+        let expectedRootHash = lcState.header.app_hash.toLowerCase()
         let rootHash = (await getRoot(value)).toString('hex')
         if (rootHash !== expectedRootHash) {
           throw new Error(
