@@ -324,14 +324,26 @@ Lotion.connect = function(GCI, opts = {}) {
           throw new Error('invalid json in query response')
         }
 
-        let lcState = lc.state()
 
-        if (lcState.header.height != resp.height) {
+        let lcState = lc.state()
+        // console.log(`lc height: ${lcState.header.height}`)
+        // console.log(`re height: ${resp.height}`)
+
+        let expectedRootHash
+        // if (lcState.header.height != resp.height) {
+        if (true) {
           await waitForHeight(resp.height, lc)
+          expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+        } else {
+          expectedRootHash = lcState.header.app_hash.toLowerCase()
         }
 
-        let expectedRootHash = lcState.header.app_hash.toLowerCase()
         let rootHash = (await getRoot(value)).toString('hex')
+
+        // console.log(`current: ${lcState.header.app_hash.toLowerCase()}`)
+        // console.log(`expected: ${expectedRootHash}`)
+        // console.log(`actually: ${rootHash}`)
+
         if (rootHash !== expectedRootHash) {
           throw new Error(
             `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
