@@ -41,10 +41,13 @@
     "protobufjs": "^6.8.3",
     "protocol-buffers-encodings": "^1.1.0",
     "proxmise": "^1.0.0",
+    "signalhub": "^4.9.0",
     "tendermint": "^3.1.2",
     "unzip": "^0.1.11",
     "varint": "git+ssh://git@github.com/AltCoinExchange/varint.git",
-    "varstruct": "^6.1.1"
+    "varstruct": "^6.1.1",
+    "webrtc-swarm": "^2.9.0",
+    "wrtc": "^0.1.4"
   },
   "devDependencies": {
     "all-contributors-cli": "^4.9.1",

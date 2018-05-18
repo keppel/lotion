@@ -40,6 +40,7 @@ function getGenesis(genesisPath) {
 function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
+  let signalHub = opts.signalHub || undefined
   let logTendermint = opts.logTendermint || false
   let createEmptyBlocks =
     typeof opts.createEmptyBlocks === 'undefined'
@@ -199,7 +200,7 @@ function Lotion(opts = {}) {
             'http://localhost:' + tendermintPort
           )
           GCI = getGCIFromGenesis(genesisJson)
-          serveGenesisGCI(GCI, genesisJson)
+          serveGenesisGCI(GCI, genesisJson, tendermintPort, signalHub)
         }
         await tendermint.synced
         if (!lite) {
