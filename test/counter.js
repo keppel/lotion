@@ -42,6 +42,9 @@ test('setup', async t => {
         state.accounts.foo.otherBalance = 60
       }
     }
+    if (tx.type === 'staking') {
+      chainInfo.validators[tx.pubKey] = 1000
+    }
   }
 
   function blockHandler(state, chainInfo) {
@@ -138,8 +141,23 @@ test("tx that doesn't mutate state", async t => {
 
 test('node info endpoint', async t => {
   let result = await axios.get('http://localhost:3000/info')
-  t.equal(Buffer.from(result.data.pubKey, 'base64').length, 32)
+  t.equal(Buffer.from(result.data.pubKey, 'base64').length, 37)
   t.end()
+})
+
+test('validator set changes', async t => {
+  let result = await axios.get('http://localhost:3000/tendermint/validators')
+  t.equal(result.data.result.validators[0].voting_power, 10)
+  let pubKey = await axios
+    .get('http://localhost:3000/info')
+    .then(res => res.data.pubKey)
+  let { data } = await axios.post('http://localhost:3000/txs', {
+    type: 'staking',
+    pubKey
+  })
+  await delay(3000)
+  let result2 = await axios.get('http://localhost:3000/tendermint/validators')
+  t.equal(result2.data.result.validators[0].voting_power, 1000)
 })
 
 test('cleanup', t => {
