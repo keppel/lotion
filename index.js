@@ -194,20 +194,16 @@ function Lotion(opts = {}) {
           console.log(e)
         }
 
-        // serve genesis.json and get GCI
-        let GCI
-        if (!lite) {
-          let genesisJson = await getGenesisRPC(
-            'http://localhost:' + tendermintPort
-          )
-          GCI = getGCIFromGenesis(genesisJson)
-          serveGenesisGCI(GCI, genesisJson)
-        }
-
         await tendermint.synced
-        if (!lite) {
-          announceSelfAsFullNode({ GCI, tendermintPort })
-        }
+
+        // serve genesis.json and get GCI
+        let genesisJson = fs.readFileSync(
+          join(lotionPath, 'config', 'genesis.json'),
+          'utf8'
+        )
+        let { GCI } = serveGenesisGCI(genesisJson)
+
+        announceSelfAsFullNode({ GCI, tendermintPort })
 
         let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
         nodeInfo.GCI = GCI
@@ -224,10 +220,10 @@ function Lotion(opts = {}) {
             tendermintPort,
             abciPort,
             txServerPort,
-            GCI: GCI,
+            GCI,
             p2pPort,
             lotionPath,
-            genesisPath: join(lotionPath, 'genesis.json'),
+            genesisPath: join(lotionPath, 'config', 'genesis.json'),
             lite
           }
 
