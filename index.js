@@ -17,7 +17,7 @@ let merk = require('merk')
 let { EventEmitter } = require('events')
 let isElectron = require('is-electron')
 
-const LOTION_HOME = process.env.LOTION_HOME || os.homedir() + '/.lotion'
+const LOTION_HOME = process.env.LOTION_HOME || join(os.homedir(), '.lotion')
 
 if (isElectron()) {
   axios.defaults.adapter = require('axios/lib/adapters/http')
@@ -86,8 +86,6 @@ function Lotion(opts = {}) {
         appMethods.useBlock(middleware.middleware)
       } else if (middleware.type === 'initializer') {
         appMethods.useInitializer(middleware.middleware)
-      } else if (middleware.type === 'tx-endpoint') {
-        appMethods.useTxEndpoint(middleware.path, middleware.middleware)
       } else if (middleware.type === 'post-listen') {
         appMethods.usePostListen(middleware.middleware)
       }
@@ -98,9 +96,6 @@ function Lotion(opts = {}) {
     },
     useBlock: blockHandler => {
       blockMiddleware.push(blockHandler)
-    },
-    useTxEndpoint: (path, txEndpoint) => {
-      txEndpoints.push({ path: path.toLowerCase(), middleware: txEndpoint })
     },
     useQuery: queryHandler => {
       queryMiddleware.push(queryHandler)

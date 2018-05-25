@@ -52,13 +52,8 @@ test('setup', async t => {
     state.lastHeight = chainInfo.height - 1
   }
 
-  function txEndpoint(tx, nodeInfo) {
-    return Object.assign({}, tx, { isSpecial: true })
-  }
-
   app.use(txHandler)
   app.useBlock(blockHandler)
-  app.useTxEndpoint('/special', txEndpoint)
 
   let { GCI } = await app.listen(3000)
   t.equal(typeof GCI, 'string')
