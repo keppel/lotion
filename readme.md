@@ -169,8 +169,8 @@ Transaction handlers must be deterministic: for a given set of `state`/`tx`/`cha
 {
   height: 42, // number of blocks committed so far. usually 1 new block per second.
   validators: {
-    '<some pub key hex>' : 20, // voting power distribution for validators. requires understanding tendermint.
-    '<other pub key hex>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
+    '<some base64-encoded pubkey>' : 20, // voting power distribution for validators. requires understanding tendermint.
+    '<other pubkey in base64>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
   }
 }
 ```
