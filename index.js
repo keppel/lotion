@@ -46,10 +46,9 @@ function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
   let peers = opts.peers || []
   let logTendermint = opts.logTendermint || false
-  let createEmptyBlocks =
-    typeof opts.createEmptyBlocks === 'undefined'
-      ? true
-      : opts.createEmptyBlocks
+  let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
+    ? true
+    : opts.createEmptyBlocks
   let target = opts.target
   let devMode = opts.devMode || false
   let lite = opts.lite || false
@@ -63,14 +62,12 @@ function Lotion(opts = {}) {
   if (lite) {
     Tendermint = TendermintLite
   }
-  let keys =
-    typeof opts.keys === 'string'
-      ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
-      : opts.keys
-  let genesis =
-    typeof opts.genesis === 'string'
-      ? JSON.parse(getGenesis(opts.genesis))
-      : opts.genesis
+  let keys = typeof opts.keys === 'string'
+    ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
+    : opts.keys
+  let genesis = typeof opts.genesis === 'string'
+    ? JSON.parse(getGenesis(opts.genesis))
+    : opts.genesis
 
   let appState = Object.assign({}, initialState)
   let bus = new EventEmitter()
@@ -256,18 +253,18 @@ let Proxmise = require('proxmise')
 let get = require('lodash.get')
 
 function waitForHeight(resp, lc, opts) {
-    return new Promise((resolve, reject) => {
-        function handleUpdate(header) {
-        if (header.height > resp.height) {
-            resolve(false)
-            lc.removeListener('update', handleUpdate)
-        }
-        if (opts.liteTimeout) {
-            setTimeout(() => {
-                resolve(true)
-            lc.removeListener('update', handleUpdate)
+  return new Promise((resolve, reject) => {
+    function handleUpdate(header) {
+      if (header.height > resp.height) {
+        resolve(false)
+        lc.removeListener('update', handleUpdate)
+      }
+      if (opts.liteTimeout) {
+        setTimeout(() => {
+          resolve(true)
+          lc.removeListener('update', handleUpdate)
         }, opts.liteTimeout)
-        }
+      }
     }
     lc.on('update', handleUpdate)
   })
@@ -335,16 +332,16 @@ Lotion.connect = function(GCI, opts = {}) {
           throw new Error('invalid json in query response')
         }
         if (!opts.lite) {
-            let timeOuted = await waitForHeight(resp, lc, opts)
-            if (!timeOuted) {
-                let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
-                let rootHash = (await getRoot(value)).toString('hex')
-                if (rootHash !== expectedRootHash) {
-                    throw new Error(
-                        `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
-                    )
-                }
+          let timeOuted = await waitForHeight(resp, lc, opts)
+          if (!timeOuted) {
+            let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
+            let rootHash = (await getRoot(value)).toString('hex')
+            if (rootHash !== expectedRootHash) {
+              throw new Error(
+                `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
+              )
             }
+          }
         }
         return path ? get(value, path) : value
       },
@@ -360,10 +357,7 @@ Lotion.connect = function(GCI, opts = {}) {
 
           axios
             .get(
-              `${fullNodeRpcAddress.replace(
-                'ws:',
-                'http:'
-              )}/broadcast_tx_commit`,
+              `${fullNodeRpcAddress.replace('ws:', 'http:')}/broadcast_tx_commit`,
               {
                 params: {
                   tx: txBytes
