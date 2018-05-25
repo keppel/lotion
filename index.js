@@ -5,17 +5,12 @@ let { join } = require('path')
 let ABCIServer = require('./lib/abci-app.js')
 let TxServer = require('./lib/tx-server.js')
 let Tendermint = require('./lib/tendermint.js')
-let TendermintLite = require('./lib/tendermint-lite.js')
 let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
-let getGenesisRPC = require('./lib/get-genesis-rpc.js')
-let getGenesisGCI = require('./lib/gci-get-genesis.js')
-let getGCIFromGenesis = require('./lib/get-gci-from-genesis.js')
 let serveGenesisGCI = require('./lib/gci-serve-genesis.js')
 let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
-let getPeerGCI = require('./lib/gci-get-peer.js')
 let os = require('os')
 let axios = require('axios')
 let merk = require('merk')
@@ -49,9 +44,7 @@ function Lotion(opts = {}) {
   let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
     ? true
     : opts.createEmptyBlocks
-  let target = opts.target
   let devMode = opts.devMode || false
-  let lite = opts.lite || false
   let unsafeRpc = opts.unsafeRpc
   let txMiddleware = []
   let queryMiddleware = []
@@ -59,9 +52,6 @@ function Lotion(opts = {}) {
   let blockMiddleware = []
   let postListenMiddleware = []
   let txEndpoints = []
-  if (lite) {
-    Tendermint = TendermintLite
-  }
   let keys = typeof opts.keys === 'string'
     ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
     : opts.keys
@@ -156,7 +146,7 @@ function Lotion(opts = {}) {
         let merkDb = level(join(lotionPath, 'merk'))
         let store = await merk(merkDb)
 
-        let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
+        let tendermintRpcUrl = `http://localhost:${tendermintPort}`
 
         initializerMiddleware.forEach(initializer => {
           initializer(appState)
@@ -184,7 +174,6 @@ function Lotion(opts = {}) {
             networkId,
             peers,
             genesis,
-            target,
             keys,
             initialAppHash,
             unsafeRpc
@@ -204,8 +193,7 @@ function Lotion(opts = {}) {
         let { GCI } = serveGenesisGCI(genesisJson)
 
         announceSelfAsFullNode({ GCI, tendermintPort })
-
-        let nodeInfo = await getNodeInfo(lotionPath, opts.lite)
+        let nodeInfo = await getNodeInfo(lotionPath)
         nodeInfo.GCI = GCI
         let txServer = TxServer({
           tendermintRpcUrl,
@@ -223,8 +211,7 @@ function Lotion(opts = {}) {
             GCI,
             p2pPort,
             lotionPath,
-            genesisPath: join(lotionPath, 'config', 'genesis.json'),
-            lite
+            genesisPath: join(lotionPath, 'config', 'genesis.json')
           }
 
           bus.emit('listen')
@@ -242,142 +229,6 @@ function Lotion(opts = {}) {
   return appMethods
 }
 
-let tendermint = require('tendermint')
-let txEncoding = require('./lib/tx-encoding.js')
-let { parse } = require('deterministic-json')
-let Proxmise = require('proxmise')
-let get = require('lodash.get')
-
-function waitForHeight(resp, lc, opts) {
-  return new Promise((resolve, reject) => {
-    function handleUpdate(header) {
-      if (header.height > resp.height) {
-        resolve(false)
-        lc.removeListener('update', handleUpdate)
-      }
-      if (opts.liteTimeout) {
-        setTimeout(() => {
-          resolve(true)
-          lc.removeListener('update', handleUpdate)
-        }, opts.liteTimeout)
-      }
-    }
-    lc.on('update', handleUpdate)
-  })
-}
-
-Lotion.connect = function(GCI, opts = {}) {
-  return new Promise(async (resolve, reject) => {
-    let bus = new EventEmitter()
-    let nodes = opts.nodes || []
-    // get genesis
-    let genesis = opts.genesis
-
-    if (!genesis) {
-      try {
-        genesis = JSON.parse(await getGenesisGCI(GCI))
-      } catch (e) {
-        return console.log('invalid genesis.json from GCI')
-      }
-    }
-    // get a full node to connect to
-    // use a peer from opts.peers if available. fall back to dht lookup.
-
-    let fullNodeRpcAddress
-    if (nodes.length) {
-      // randomly sample from supplied seed nodes
-      let randomIndex = Math.floor(Math.random() * nodes.length)
-      fullNodeRpcAddress = nodes[randomIndex]
-    } else {
-      fullNodeRpcAddress = await getPeerGCI(GCI)
-    }
-
-    let clientState = {
-      validators: genesis.validators,
-      commit: null,
-      header: { height: 1, chain_id: genesis.chain_id }
-    }
-    let lc = tendermint(fullNodeRpcAddress, clientState)
-    let rpc = tendermint.RpcClient(fullNodeRpcAddress)
-    let appHashByHeight = {}
-
-    lc.on('error', e => bus.emit('error', e))
-    rpc.on('error', e => bus.emit('error', e))
-
-    lc.on('update', function(header, commit, validators) {
-      let appHash = header.app_hash
-      appHashByHeight[header.height - 1] = appHash
-    })
-    rpc.subscribe({ query: "tm.event = 'NewBlockHeader'" }, function() {
-      bus.emit('block')
-    })
-
-    let methods = {
-      bus,
-      rpc,
-      getState: async function(path = '') {
-        let queryResponse = await axios.get(
-          `${fullNodeRpcAddress}/abci_query?path=""`
-        )
-        let resp = queryResponse.data.result.response
-        resp.height = Number(resp.height)
-        let value
-        try {
-          value = parse(Buffer.from(resp.value, 'hex').toString())
-        } catch (e) {
-          throw new Error('invalid json in query response')
-        }
-        if (!opts.lite) {
-          let timeOuted = await waitForHeight(resp, lc, opts)
-          if (!timeOuted) {
-            let expectedRootHash = appHashByHeight[resp.height].toLowerCase()
-            let rootHash = (await getRoot(value)).toString('hex')
-            if (rootHash !== expectedRootHash) {
-              throw new Error(
-                `app hash mismatch. expected: ${expectedRootHash} actual: ${rootHash}`
-              )
-            }
-          }
-        }
-        return path ? get(value, path) : value
-      },
-
-      state: Proxmise(async path => {
-        return await methods.getState(path.join('.'))
-      }),
-
-      send: function(tx) {
-        return new Promise((resolve, reject) => {
-          let nonce = Math.floor(Math.random() * (2 << 12))
-          let txBytes = '0x' + txEncoding.encode(tx, nonce).toString('hex')
-
-          axios
-            .get(
-              `${fullNodeRpcAddress.replace('ws:', 'http:')}/broadcast_tx_commit`,
-              {
-                params: {
-                  tx: txBytes
-                }
-              }
-            )
-            .then(res => {
-              bus.once('block', function() {
-                bus.once('block', function() {
-                  resolve(res.data.result)
-                })
-              })
-            })
-            .catch(e => {
-              console.log('error broadcasting transaction:')
-              console.log(e)
-              reject(e)
-            })
-        })
-      }
-    }
-
-    resolve(methods)
-  })
-}
+Lotion.connect = require('../lotion-connect')
 
 module.exports = Lotion
