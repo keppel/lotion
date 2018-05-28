@@ -18,7 +18,7 @@ test('setup', async t => {
   let opts = {
     initialState: { txCount: 0, blockCount: 0, specialTxCount: 0 },
     devMode: true,
-    logTendermint: false
+    logTendermint: true
   }
 
   app = lotion(opts)
