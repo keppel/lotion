@@ -160,3 +160,7 @@ test('cleanup', t => {
   t.end()
   process.exit()
 })
+
+process.on('unhandledRejection', reason => {
+  console.log(reason)
+})
