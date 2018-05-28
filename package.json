@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "test": "DEBUG=abci nyc tape test/counter.js",
+    "test": "nyc tape test/counter.js",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
