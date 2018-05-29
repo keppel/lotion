@@ -7,7 +7,8 @@
     "example": "example"
   },
   "scripts": {
-    "test": "nyc tape test/counter.js && codecov",
+    "test": "nyc tape test/counter.js",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
