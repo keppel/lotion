@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "test": "nyc tape test/counter.js",
+    "test": "nyc tape test/counter.js && codecov",
     "contributors:add": "all-contributors add",
     "contributors:generate": "all-contributors generate"
   },
