@@ -25,6 +25,10 @@
   <a href="https://slack.lotionjs.com">
     <img src="https://img.shields.io/badge/chat-on%20slack-7A5979.svg" alt="chat on slack">
   </a>
+  <a href="https://codecov.io/gh/keppel/lotion">
+    <img src="https://img.shields.io/codecov/c/github/keppel/lotion/develop.svg" alt="test coverage">
+  </a>
+  
 </p>
 <br>
 
