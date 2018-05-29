@@ -4,6 +4,7 @@ node_js:
 install:
   - npm install -g codecov
   - npm install -g nyc
+  - npm install -g tape
 script:
-  - npm run test
+  - npm test
   - npm run report-coverage
