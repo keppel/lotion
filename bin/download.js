@@ -11,7 +11,7 @@ wget({url: tendermintUrl, dest: __dirname + "/tendermint.zip"}, (e) => {
       .pipe(unzip.Parse())
       .on('entry', function (entry) {
         entry.pipe(fs.createWriteStream(__dirname + '/tendermint',  { mode: 0o777 }));
-        fs.unlink(__dirname + '/tendermint.zip')
+        fs.unlinkSync(__dirname + '/tendermint.zip')
       });
   }
 })
