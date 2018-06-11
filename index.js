@@ -39,6 +39,7 @@ function getGenesis(genesisPath) {
 
 function Lotion(opts = {}) {
   let initialState = opts.initialState || {}
+  let startingBlockHeight = opts.startingBlockHeight || 0
   let peers = opts.peers || []
   let signalHub = opts.signalHub || undefined
   let logTendermint = opts.logTendermint || false
@@ -130,7 +131,7 @@ function Lotion(opts = {}) {
             blockMiddleware,
             queryMiddleware,
             initializerMiddleware,
-            initialState,
+            // initialState, // TODO: Separate init block from starting block
             devMode,
             genesis
           )
@@ -168,7 +169,8 @@ function Lotion(opts = {}) {
           queryMiddleware,
           initializerMiddleware,
           store,
-          initialAppHash
+          initialAppHash,
+          startingBlockHeight
         })
         abciServer.listen(abciPort, 'localhost')
 
