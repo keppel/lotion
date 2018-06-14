@@ -13,7 +13,7 @@ let opts = {
   abciPort: 46662,
   devMode: true,
   createEmptyBlocks: true,
-  createEmptyBlocksInterval: 5,
+  createEmptyBlocksInterval: 30,
 }
 let app = require('../../')(opts)
 
@@ -28,10 +28,10 @@ app.useBlock(async(state, chainInfo) => {
   let response = await axios.get(`http://localhost:${opts.tendermintPort}/blockchain?minHeight=${chainInfo.height-1}&maxHeight=${chainInfo.height-1}`);
   let blockHeader = response.data.result.block_metas[0].header;
   // console.log(blockHeader)
-  let time = Date.parse(blockHeader.time)
+  let time = parseInt(Date.parse(blockHeader.time)/1000)
   // let time = parseInt(Date.now()/10000)
   console.log("Checking time: " + time)
-  if (time > (state.lastMatch + 15000)) {
+  if (time > (state.lastMatch + 60)) {
     console.log("\nMATCHING TIME! " + time + "\n")
     state.lastMatch = time
   }
