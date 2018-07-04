@@ -97,6 +97,64 @@
       "contributions": [
         "example"
       ]
+    },
+    {
+      "login": "rllola",
+      "name": "Lola Dam",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1772945?v=4",
+      "profile": "https://github.com/rllola",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "MisterDr",
+      "name": "Djenad Razic",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/2449579?v=4",
+      "profile": "http://www.machinezdesign.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "criticalbh",
+      "name": "Admir Sabanovic",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/5900925?v=4",
+      "profile": "http://dev.ba",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ameeuw",
+      "name": "Arne Meeuw",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/5405348?v=4",
+      "profile": "http://meeuw.me",
+      "contributions": [
+        "question",
+        "ideas"
+      ]
+    },
+    {
+      "login": "propslove",
+      "name": "Props.love",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/36277340?v=4",
+      "profile": "https://www.props.love",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "nylira",
+      "name": "Peng Zhong",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/172531?v=4",
+      "profile": "http://cosmos.network",
+      "contributions": [
+        "design",
+        "example",
+        "ideas"
+      ]
     }
   ],
   "repoType": "github"
