@@ -44,8 +44,8 @@ function Lotion(opts = {}) {
   let createEmptyBlocks = typeof opts.createEmptyBlocks === 'undefined'
     ? true
     : opts.createEmptyBlocks
-  let devMode = opts.devMode || false
-  let unsafeRpc = opts.unsafeRpc
+  let devMode = process.env.DEV_MODE === 'true' || opts.devMode || false
+  let unsafeRpc = process.env.UNSAFE_RPC === 'true' || opts.unsafeRpc
   let txMiddleware = []
   let queryMiddleware = []
   let initializerMiddleware = []
@@ -55,6 +55,11 @@ function Lotion(opts = {}) {
   let keys = typeof opts.keys === 'string'
     ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
     : opts.keys
+
+  if (process.env.GENESIS_PATH) {
+    opts.genesis = process.env.GENESIS_PATH
+  }
+
   let genesis = typeof opts.genesis === 'string'
     ? JSON.parse(getGenesis(opts.genesis))
     : opts.genesis
