@@ -56,6 +56,11 @@ function Lotion(opts = {}) {
   let keys = typeof opts.keys === 'string'
     ? JSON.parse(fs.readFileSync(opts.keys, { encoding: 'utf8' }))
     : opts.keys
+
+  if (process.env.GENESIS_PATH) {
+    opts.genesis = process.env.GENESIS_PATH
+  }
+
   let genesis = typeof opts.genesis === 'string'
     ? JSON.parse(getGenesis(opts.genesis))
     : opts.genesis
