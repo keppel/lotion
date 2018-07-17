@@ -45,9 +45,6 @@ function Lotion(opts = {}) {
     ? true
     : opts.createEmptyBlocks
   let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
-  let devMode = opts.devMode || false
-  let unsafeRpc = opts.unsafeRpc
-  let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
   let devMode = process.env.DEV_MODE === 'true' || opts.devMode || false
   let unsafeRpc = process.env.UNSAFE_RPC === 'true' || opts.unsafeRpc
   let txMiddleware = []
@@ -149,6 +146,7 @@ function Lotion(opts = {}) {
         // initialize merk store
         let merkDb = level(join(lotionPath, 'merk'))
         let store = await merk(merkDb)
+        let storeDb = level(join(lotionPath, 'store'))
 
         let tendermintRpcUrl = `http://localhost:${tendermintPort}`
 
@@ -163,6 +161,7 @@ function Lotion(opts = {}) {
           queryMiddleware,
           initializerMiddleware,
           store,
+          storeDb,
           initialAppHash
         })
         abciServer.listen(abciPort, 'localhost')
