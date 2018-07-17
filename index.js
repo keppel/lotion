@@ -47,6 +47,9 @@ function Lotion(opts = {}) {
   let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
   let devMode = opts.devMode || false
   let unsafeRpc = opts.unsafeRpc
+  let createEmptyBlocksInterval = opts.createEmptyBlocksInterval || 0
+  let devMode = process.env.DEV_MODE === 'true' || opts.devMode || false
+  let unsafeRpc = process.env.UNSAFE_RPC === 'true' || opts.unsafeRpc
   let txMiddleware = []
   let queryMiddleware = []
   let initializerMiddleware = []
