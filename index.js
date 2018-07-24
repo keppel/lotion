@@ -198,7 +198,7 @@ function Lotion(opts = {}) {
           'utf8'
         )
         // let { GCI } = serveGenesisGCI(genesisJson)
-        let { GCI } = createHash('sha256').update(content).digest('hex')
+        let GCI = createHash('sha256').update(Buffer.from(genesisJson, 'utf8')).digest('hex')
 
         // announceSelfAsFullNode({ GCI, tendermintPort })
         let nodeInfo = await getNodeInfo(lotionPath)
