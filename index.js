@@ -1,6 +1,7 @@
 let getPort = require('get-port')
 let fs = require('fs-extra')
 let level = require('level')
+let { createHash } = require('crypto')
 let { join } = require('path')
 let ABCIServer = require('./lib/abci-app.js')
 let TxServer = require('./lib/tx-server.js')
@@ -196,7 +197,8 @@ function Lotion(opts = {}) {
           join(lotionPath, 'config', 'genesis.json'),
           'utf8'
         )
-        let { GCI } = serveGenesisGCI(genesisJson)
+        // let { GCI } = serveGenesisGCI(genesisJson)
+        let { GCI } = createHash('sha256').update(content).digest('hex')
 
         // announceSelfAsFullNode({ GCI, tendermintPort })
         let nodeInfo = await getNodeInfo(lotionPath)
