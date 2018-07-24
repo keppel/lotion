@@ -9,8 +9,8 @@ let rimraf = require('rimraf')
 let generateNetworkId = require('./lib/network-id.js')
 let getNodeInfo = require('./lib/node-info.js')
 let getRoot = require('./lib/get-root.js')
-let serveGenesisGCI = require('./lib/gci-serve-genesis.js')
-let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
+// let serveGenesisGCI = require('./lib/gci-serve-genesis.js')
+// let announceSelfAsFullNode = require('./lib/gci-announce-self.js')
 let os = require('os')
 let axios = require('axios')
 let merk = require('merk')
@@ -198,7 +198,7 @@ function Lotion(opts = {}) {
         )
         let { GCI } = serveGenesisGCI(genesisJson)
 
-        announceSelfAsFullNode({ GCI, tendermintPort })
+        // announceSelfAsFullNode({ GCI, tendermintPort })
         let nodeInfo = await getNodeInfo(lotionPath)
         nodeInfo.GCI = GCI
         let txServer = TxServer({
