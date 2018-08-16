@@ -153,6 +153,8 @@ function Lotion(opts = {}) {
         // initialize merk store
         let merkDb = level(join(lotionPath, 'merk'))
         let store = await merk(merkDb)
+        let storeDb = level(join(lotionPath, 'store'))
+        let diffDb = level(join(lotionPath, 'diff'))
 
         let tendermintRpcUrl = target || `http://localhost:${tendermintPort}`
 
@@ -167,6 +169,8 @@ function Lotion(opts = {}) {
           queryMiddleware,
           initializerMiddleware,
           store,
+          storeDb,
+          diffDb,
           initialAppHash
         })
         abciServer.listen(abciPort, 'localhost')
