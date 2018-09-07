@@ -154,6 +154,9 @@ class LotionApp implements Application {
   }
 }
 
-export = function(config) {
+let Lotion: any = function(config) {
   return new LotionApp(config)
 }
+
+Lotion.connect = require('lotion-connect')
+export = Lotion

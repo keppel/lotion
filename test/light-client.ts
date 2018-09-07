@@ -1,4 +1,4 @@
-let connect = require('../../lotion-connect/index.js')
+let { connect } = require('../src/index')
 
 async function main() {
   let { state, send } = await connect(process.env.GCI)

@@ -4,7 +4,7 @@
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"no test specified\" && exit 0",
     "install": "tsc"
   },
   "keywords": [],
