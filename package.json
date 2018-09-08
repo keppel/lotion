@@ -1,46 +1,25 @@
 {
   "name": "lotion",
-  "version": "0.1.19",
+  "version": "0.2.0",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
-  "main": "index.js",
-  "directories": {
-    "example": "example"
-  },
+  "main": "dist/index.js",
   "scripts": {
-    "test": "nyc tape test/counter.js",
-    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "contributors:add": "all-contributors add",
-    "contributors:generate": "all-contributors generate"
+    "test": "echo \"no test specified\" && exit 0",
+    "install": "tsc"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "abci": "^2.1.0",
-    "axios": "^0.16.2",
-    "body-parser": "^1.17.2",
-    "cors": "^2.8.4",
+    "@types/node": "^10.5.2",
+    "abci": "^4.0.0",
     "deterministic-json": "^1.0.4",
-    "express": "^4.15.4",
-    "express-http-proxy": "^1.0.7",
-    "fs-extra": "^5.0.0",
-    "get-port": "^3.1.0",
-    "is-electron": "^2.1.0",
+    "fs-extra": "^7.0.0",
+    "get-port": "^4.0.0",
     "jpfs": "0.0.3",
-    "jsondiffpatch": "^0.2.5",
-    "level": "^4.0.0",
-    "lodash.get": "^4.4.2",
-    "lotion-connect": "^0.1.2",
-    "merk": "^1.3.1",
-    "peer-channel": "0.1.1",
-    "tendermint-node": "^2.0.5",
-    "varstruct": "^6.1.1"
-  },
-  "devDependencies": {
-    "all-contributors-cli": "^4.9.1",
-    "nyc": "^11.3.0",
-    "rimraf": "^2.6.2",
-    "tape": "^4.8.0",
-    "tape-promise": "^2.0.1"
+    "lotion-connect": "^0.1.3",
+    "lotion-state-machine": "0.0.1",
+    "peer-channel": "^0.1.1",
+    "tendermint-node": "^3.3.0"
   }
 }
