@@ -147,17 +147,16 @@ Contributions of any kind welcome!
 
 Create a new Lotion app.
 
-Here are the default options for `opts` which you can override:
+Here are the available options for `opts` which you can override:
 
 ```js
 {
   devMode: false,       // set this true to wipe blockchain data between runs
   initialState: {},     // initial blockchain state
-  keys: '',             // path to keys.json. generates own keys if not specified.
-  genesis: '',          // path to genesis.json. generates new one if not specified.
+  keyPath: './keys.json',             // path to keys.json. generates own keys if not specified.
+  genesisPath: './genesis.json',          // path to genesis.json. generates new one if not specified.
   peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
   logTendermint: false, // if true, shows all output from the underlying tendermint process
-  createEmptyBlocks: true, // if false, Tendermint will not create empty blocks which may result in a reduced blockchain file size
   p2pPort: 46658,       // port to use for tendermint peer connections
   tendermintPort: 46657 // port to use for tendermint rpc
 }
