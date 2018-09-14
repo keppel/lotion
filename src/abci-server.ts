@@ -1,13 +1,16 @@
 import djson = require('deterministic-json')
 import vstruct = require('varstruct')
 
+let to = require('await-to-js').to
+import jsondiffpatch = require('jsondiffpatch')
+
 let createServer = require('abci')
 
 export interface ABCIServer {
   listen(port)
 }
 
-export default function createABCIServer(stateMachine, initialState): any {
+export default function createABCIServer(stateMachine, initialState, storeDb, diffDb): any {
   let height = 0
   let abciServer = createServer({
     info(request) {
@@ -62,9 +65,62 @@ export default function createABCIServer(stateMachine, initialState): any {
         validatorUpdates
       }
     },
-    commit() {
-      let data = stateMachine.commit()
-      return { data: Buffer.from(data, 'hex') }
+    async commit() {
+      let appHash = stateMachine.commit()
+      let appState = stateMachine.query()
+      let chainInfo = stateMachine.info()
+
+      let lastBlockHeight
+      try {
+        lastBlockHeight = await storeDb.get('lastBlockHeight')
+      } catch(err) {
+        lastBlockHeight = 0
+      }
+      let lastState
+      try {
+        lastState = djson.parse(await storeDb.get(lastBlockHeight))
+      } catch(err) {
+        lastState = { appState }
+      }
+
+      let diff = jsondiffpatch.diff(lastState.appState, appState)
+      if (diff) {
+        console.log(`\nLASTSTATE ${lastBlockHeight}\n`)
+        console.log(JSON.stringify(lastState.appState, null, 2))
+        console.log(`\nSTATE ${height}\n`)
+        console.log(JSON.stringify(appState, null, 2))
+        console.log(`\nDIFF ${lastBlockHeight} --> ${height}\n`)
+        console.log(JSON.stringify(diff, null, 2))
+        let [err, response] = await to(diffDb.put(height, djson.stringify(diff)))
+        if (err) console.log("Error saving diff.")
+      }
+
+      // Store storeObject in storeDB
+      let storeObject = JSON.stringify({
+        appHash: appHash.toString('hex'),
+        appState,
+        chainInfo
+      })
+
+      let [err, response] = await to(storeDb.put(height, storeObject))
+      if (err) {
+        // console.log("Error storing storeObject")
+      } else {
+        let [err, reponse] = await to(storeDb.put('lastBlockHeight', height))
+        if (err) {
+          // console.log("Error storing lastBlockHeight")
+        } else {
+          // console.log("Success storing storeObject and lastBlockHeight")
+          if (chainInfo.height > 2) {
+            let [err, response] = await to(storeDb.del((height-2)))
+            if (err) {
+              // console.log("Error deleting storeObject from two heights ago...")
+            }
+          }
+        }
+      }
+
+      return { data: Buffer.from(appHash, 'hex') }
     },
 
     initChain(request) {

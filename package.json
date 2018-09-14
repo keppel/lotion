@@ -13,10 +13,13 @@
   "dependencies": {
     "@types/node": "^10.5.2",
     "abci": "^4.0.0",
+    "await-to-js": "^2.0.1",
     "deterministic-json": "^1.0.4",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
     "jpfs": "0.0.3",
+    "jsondiffpatch": "^0.3.11",
+    "level": "^4.0.0",
     "lotion-connect": "^0.1.3",
     "lotion-state-machine": "0.0.1",
     "npm": "^6.4.1",

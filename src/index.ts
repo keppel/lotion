@@ -12,6 +12,7 @@ import createDiscoveryServer, { DiscoveryServer } from './discovery'
 import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
+import level = require('level')
 
 interface ApplicationConfig extends BaseApplicationConfig {
   rpcPort?: number
@@ -52,6 +53,8 @@ class LotionApp implements Application {
   private emptyBlocksInterval: number
   private home: string
   private lotionHome: string = join(homedir(), '.lotion', 'networks')
+  private storeDb: object
+  private diffDb: object
 
   public use
   public useTx
@@ -128,7 +131,10 @@ class LotionApp implements Application {
     // start state machine
     this.stateMachine = this.application.compile()
 
-    this.abciServer = createABCIServer(this.stateMachine, this.initialState)
+    this.storeDb = level(join(this.home, 'store'))
+    this.diffDb = level(join(this.home, 'diff'))
+
+    this.abciServer = createABCIServer(this.stateMachine, this.initialState, this.storeDb, this.diffDb)
     this.abciServer.listen(this.ports.abci)
 
     // start tendermint process
