@@ -14,10 +14,14 @@ import fs = require('fs-extra')
 import getPort = require('get-port')
 import level = require('level')
 
+import TxServer = require('./tx-server')
+
+
 interface ApplicationConfig extends BaseApplicationConfig {
   rpcPort?: number
   p2pPort?: number
   abciPort?: number
+  lotionPort?: number
   logTendermint?: boolean
   emptyBlocksInterval?: number
   keyPath?: string
@@ -29,6 +33,7 @@ interface PortMap {
   abci: number
   p2p: number
   rpc: number
+  lotion: number
 }
 
 interface AppInfo {
@@ -55,6 +60,8 @@ class LotionApp implements Application {
   private lotionHome: string = join(homedir(), '.lotion', 'networks')
   private storeDb: object
   private diffDb: object
+  private txServer: any
+  private txHTTPServer: any
 
   public use
   public useTx
@@ -79,7 +86,8 @@ class LotionApp implements Application {
     this.ports = {
       abci: this.config.abciPort || (await getPort()),
       p2p: this.config.p2pPort || (await getPort()),
-      rpc: this.config.rpcPort || (await getPort())
+      rpc: this.config.rpcPort || (await getPort()),
+      lotion: this.config.lotionPort || 3000
     }
   }
 
@@ -156,6 +164,15 @@ class LotionApp implements Application {
       GCI: this.GCI,
       genesis: this.genesis,
       rpcPort: this.ports.rpc
+    })
+
+    this.txServer = TxServer({
+      port: this.ports.lotion,
+      rpcPort: this.ports.rpc,
+      stateMachine: this.stateMachine
+    })
+    this.txHTTPServer = this.txServer.listen(this.ports.lotion, 'localhost', function() {
+      console.log("listening...")
     })
 
     let appInfo = this.getAppInfo()
