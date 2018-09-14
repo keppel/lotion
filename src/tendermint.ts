@@ -1,6 +1,8 @@
 import tendermint = require('tendermint-node')
 import fs = require('fs-extra')
 import { join } from 'path'
+let tomljs = require('toml-js')
+let toml = require('toml')
 
 interface PortMap {
   abci: number
@@ -14,6 +16,7 @@ interface TendermintConfig {
   logTendermint?: boolean
   genesisPath?: string
   keyPath?: string
+  emptyBlocksInterval?: number
   peers?: Array<string>
 }
 
@@ -27,6 +30,7 @@ export default async function createTendermintProcess({
   logTendermint,
   genesisPath,
   keyPath,
+  emptyBlocksInterval,
   peers
 }: TendermintConfig): Promise<any> {
   /**
@@ -102,6 +106,20 @@ export default async function createTendermintProcess({
    * priv_validator.json as a safeguard against accidental double-signing.
    */
 
+   if (emptyBlocksInterval>0) {
+     let content = fs.readFileSync(join(home, 'config', 'config.toml'))
+     let tmToml = toml.parse(content)
+     tmToml.consensus.create_empty_blocks_interval = emptyBlocksInterval
+     // tmToml.p2p.addr_book_strict = false
+     // tmToml.p2p.persistent_peers = peers.join(',')
+     // tmToml.p2p.laddr = `tcp://0.0.0.0:${ports.p2p}`
+     fs.writeFileSync(
+       join(home, 'config', 'config.toml'),
+       tomljs.dump(tmToml)
+     )
+     console.log("Written to config.toml")
+   }
+
   if (keyPath) {
     let privValPath = join(home, 'config', 'priv_validator.json')
     if (!fs.existsSync(keyPath)) {
@@ -120,6 +138,7 @@ export default async function createTendermintProcess({
     tendermintProcess.stdout.pipe(process.stdout)
     tendermintProcess.stderr.pipe(process.stderr)
   }
+
   tendermintProcess.then(() => {
     console.log('tm exited')
   })

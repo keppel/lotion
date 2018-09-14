@@ -18,6 +18,7 @@ interface ApplicationConfig extends BaseApplicationConfig {
   p2pPort?: number
   abciPort?: number
   logTendermint?: boolean
+  emptyBlocksInterval?: number
   keyPath?: string
   genesisPath?: string
   peers?: Array<string>
@@ -48,6 +49,7 @@ class LotionApp implements Application {
   private keyPath: string
   private initialState: object
   private logTendermint: boolean
+  private emptyBlocksInterval: number
   private home: string
   private lotionHome: string = join(homedir(), '.lotion', 'networks')
 
@@ -60,6 +62,7 @@ class LotionApp implements Application {
   constructor(private config: ApplicationConfig) {
     this.application = buildApplication(config)
     this.logTendermint = config.logTendermint
+    this.emptyBlocksInterval = config.emptyBlocksInterval
     this.initialState = config.initialState
     this.keyPath = config.keyPath
     this.genesisPath = config.genesisPath
@@ -133,6 +136,7 @@ class LotionApp implements Application {
       ports: this.ports,
       home: this.home,
       logTendermint: this.logTendermint,
+      emptyBlocksInterval: this.emptyBlocksInterval,
       keyPath: this.keyPath,
       genesisPath: this.genesisPath,
       peers: this.peers

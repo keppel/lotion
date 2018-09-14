@@ -40,9 +40,10 @@ export default function createABCIServer(stateMachine, initialState): any {
       }
     },
     beginBlock(request) {
+      let block = request.header
       let time = request.header.time.seconds.toNumber()
 
-      stateMachine.transition({ type: 'begin-block', data: { time } })
+      stateMachine.transition({ type: 'begin-block', data: { time, block } })
       return {}
     },
     endBlock() {
@@ -65,6 +66,7 @@ export default function createABCIServer(stateMachine, initialState): any {
       let data = stateMachine.commit()
       return { data: Buffer.from(data, 'hex') }
     },
+
     initChain(request) {
       /**
        * in next abci version, we'll get a timestamp here.
