@@ -15,6 +15,8 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
   let height = 0
   let abciServer = createServer({
     async info(request) {
+      return {}
+
       let appState = initialState
       console.log(JSON.stringify(request, null, 2))
       let lastBlockHeight
