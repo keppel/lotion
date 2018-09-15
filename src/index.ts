@@ -12,12 +12,18 @@ import createDiscoveryServer, { DiscoveryServer } from './discovery'
 import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
+import level = require('level')
+
+import TxServer = require('./tx-server')
+
 
 interface ApplicationConfig extends BaseApplicationConfig {
   rpcPort?: number
   p2pPort?: number
   abciPort?: number
+  lotionPort?: number
   logTendermint?: boolean
+  emptyBlocksInterval?: number
   keyPath?: string
   genesisPath?: string
   peers?: Array<string>
@@ -27,6 +33,7 @@ interface PortMap {
   abci: number
   p2p: number
   rpc: number
+  lotion: number
 }
 
 interface AppInfo {
@@ -48,8 +55,13 @@ class LotionApp implements Application {
   private keyPath: string
   private initialState: object
   private logTendermint: boolean
+  private emptyBlocksInterval: number
   private home: string
   private lotionHome: string = join(homedir(), '.lotion', 'networks')
+  private storeDb: object
+  private diffDb: object
+  private txServer: any
+  private txHTTPServer: any
 
   public use
   public useTx
@@ -60,6 +72,7 @@ class LotionApp implements Application {
   constructor(private config: ApplicationConfig) {
     this.application = buildApplication(config)
     this.logTendermint = config.logTendermint
+    this.emptyBlocksInterval = config.emptyBlocksInterval
     this.initialState = config.initialState
     this.keyPath = config.keyPath
     this.genesisPath = config.genesisPath
@@ -73,7 +86,8 @@ class LotionApp implements Application {
     this.ports = {
       abci: this.config.abciPort || (await getPort()),
       p2p: this.config.p2pPort || (await getPort()),
-      rpc: this.config.rpcPort || (await getPort())
+      rpc: this.config.rpcPort || 46657,
+      lotion: this.config.lotionPort || 3000
     }
   }
 
@@ -125,7 +139,10 @@ class LotionApp implements Application {
     // start state machine
     this.stateMachine = this.application.compile()
 
-    this.abciServer = createABCIServer(this.stateMachine, this.initialState)
+    this.storeDb = level(join(this.home, 'store'))
+    this.diffDb = level(join(this.home, 'diff'))
+
+    this.abciServer = createABCIServer(this.stateMachine, this.initialState, this.storeDb, this.diffDb)
     this.abciServer.listen(this.ports.abci)
 
     // start tendermint process
@@ -133,6 +150,7 @@ class LotionApp implements Application {
       ports: this.ports,
       home: this.home,
       logTendermint: this.logTendermint,
+      emptyBlocksInterval: this.emptyBlocksInterval,
       keyPath: this.keyPath,
       genesisPath: this.genesisPath,
       peers: this.peers
@@ -146,6 +164,15 @@ class LotionApp implements Application {
       GCI: this.GCI,
       genesis: this.genesis,
       rpcPort: this.ports.rpc
+    })
+
+    this.txServer = TxServer({
+      port: this.ports.lotion,
+      rpcPort: this.ports.rpc,
+      stateMachine: this.stateMachine
+    })
+    this.txHTTPServer = this.txServer.listen(this.ports.lotion, 'localhost', function() {
+      console.log("listening...")
     })
 
     let appInfo = this.getAppInfo()
