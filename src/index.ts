@@ -46,7 +46,7 @@ class LotionApp implements Application {
   private stateMachine: StateMachine
   private application: Application
   private abciServer: ABCIServer
-  private discoveryServer: DiscoveryServer
+  // private discoveryServer: DiscoveryServer
   private tendermintProcess
   private ports: PortMap
   private genesis: string
