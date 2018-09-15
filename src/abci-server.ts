@@ -73,11 +73,11 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       // console.log(JSON.stringify(lastState, null, 2))
       return { LastBlockAppHash: rootHash, LastBlockHeight: lastBlockHeight }
     },
-    deliverTx(request) {
+    async deliverTx(request) {
       try {
         let tx = decodeTx(request.tx)
         try {
-          stateMachine.transition({ type: 'transaction', data: tx })
+          await stateMachine.transition({ type: 'transaction', data: tx })
           return {}
         } catch (e) {
           return { code: 1, log: e.toString() }
@@ -86,11 +86,11 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         return { code: 1, log: 'Invalid transaction encoding' }
       }
     },
-    checkTx(request) {
+    async checkTx(request) {
       try {
         let tx = decodeTx(request.tx)
         try {
-          stateMachine.check(tx)
+          await stateMachine.check(tx)
           return {}
         } catch (e) {
           return { code: 1, log: e.toString() }
@@ -106,8 +106,8 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       stateMachine.transition({ type: 'begin-block', data: { time, block } })
       return {}
     },
-    endBlock() {
-      stateMachine.transition({ type: 'block', data: {} })
+    async endBlock() {
+      await stateMachine.transition({ type: 'block', data: {} })
       let { validators } = stateMachine.info()
       let validatorUpdates = []
 
@@ -142,10 +142,10 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
 
       let diff = jsondiffpatch.diff(lastState.appState, appState)
       if (diff) {
-        console.log(`\nLASTSTATE ${lastBlockHeight}\n`)
-        console.log(JSON.stringify(lastState.appState, null, 2))
-        console.log(`\nSTATE ${height}\n`)
-        console.log(JSON.stringify(appState, null, 2))
+        // console.log(`\nLASTSTATE ${lastBlockHeight}\n`)
+        // console.log(JSON.stringify(lastState.appState, null, 2))
+        // console.log(`\nSTATE ${height}\n`)
+        // console.log(JSON.stringify(appState, null, 2))
         console.log(`\nDIFF ${lastBlockHeight} --> ${height}\n`)
         console.log(JSON.stringify(diff, null, 2))
         let [err, response] = await to(diffDb.put(height, djson.stringify(diff)))
