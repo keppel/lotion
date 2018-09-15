@@ -18,7 +18,7 @@ app.use(function(state, tx) {
 
 
 app.useBlock(function(state, chainInfo) {
-  // console.log(chainInfo)
+  console.log(chainInfo)
 })
 
 app.start().then(console.log)

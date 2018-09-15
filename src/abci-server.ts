@@ -103,7 +103,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       let block = request.header
       let time = request.header.time.seconds.toNumber()
 
-      stateMachine.transition({ type: 'begin-block', data: { time, block } })
+      stateMachine.transition({ type: 'begin-block', data: { time, block, height } })
       return {}
     },
     async endBlock() {
