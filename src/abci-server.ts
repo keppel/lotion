@@ -1,5 +1,6 @@
 import djson = require('deterministic-json')
 import vstruct = require('varstruct')
+import { createHash } from 'crypto'
 
 let to = require('await-to-js').to
 import jsondiffpatch = require('jsondiffpatch')
@@ -13,8 +14,64 @@ export interface ABCIServer {
 export default function createABCIServer(stateMachine, initialState, storeDb, diffDb): any {
   let height = 0
   let abciServer = createServer({
-    info(request) {
-      return {}
+    async info(request) {
+      let appState = initialState
+      console.log(JSON.stringify(request, null, 2))
+      let lastBlockHeight
+      try {
+        lastBlockHeight = await storeDb.get('lastBlockHeight')
+      } catch(err) {
+        lastBlockHeight = 0
+      }
+      let lastState
+      try {
+        lastState = JSON.parse(await storeDb.get(lastBlockHeight))
+        console.log(`State found at ${lastBlockHeight}`)
+      } catch(err) {
+        console.log(`No state found at ${lastBlockHeight}`)
+        lastBlockHeight = 0
+        lastState = { appState }
+      }
+      // let rootHash = await getRoot(lastState.appState)
+      let rootHash = createHash('sha256')
+        .update(djson.stringify(lastState.appState))
+        .digest('hex')
+      console.log(rootHash.toString())
+      console.log(lastState.appHash)
+
+      // Yes, this is really hacky - but for now its working :D
+      if (lastState.appHash == rootHash.toString()) {
+        console.log("ALL GOOD")
+        lastState = JSON.parse(await storeDb.get(lastBlockHeight))
+      } else {
+        console.log("NOT GOOD")
+        try {
+          lastBlockHeight = lastBlockHeight - 1
+          lastState = JSON.parse(await storeDb.get(lastBlockHeight))
+          console.log(`State found at ${lastBlockHeight}`)
+        } catch(err) {
+          console.log(`No state found at ${lastBlockHeight}`)
+          lastBlockHeight = 0
+          lastState = { appState }
+        }
+        rootHash = createHash('sha256')
+          .update(djson.stringify(lastState.appState))
+          .digest('hex')
+        console.log(rootHash.toString())
+        console.log(lastState.appHash)
+      }
+
+      rootHash = createHash('sha256')
+        .update(djson.stringify(lastState.appState))
+        .digest('hex')
+      // Object.assign(store, lastState.appState)
+      height = lastBlockHeight
+
+      console.log(`Continuing blockchain from:`)
+      console.log(`lastBlockHeight: ${lastBlockHeight}`)
+      console.log(`lastBlockAppHash: ${rootHash.toString()}`)
+      // console.log(JSON.stringify(lastState, null, 2))
+      return { LastBlockAppHash: rootHash, LastBlockHeight: lastBlockHeight }
     },
     deliverTx(request) {
       try {
