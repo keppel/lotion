@@ -189,16 +189,87 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       stateMachine.initialize(initialState, initialInfo)
       return {}
     },
-    query(request) {
-      let path = request.path
+    async query(req) {
+      console.log(JSON.stringify(req, null, 2))
 
-      let queryResponse: object = stateMachine.query(path)
-      let value = Buffer.from(djson.stringify(queryResponse)).toString('base64')
-
-      return {
-        value,
-        height
+      let pathInObject = function(obj, path='') {
+        let args = path.split('.')
+        for (var i = 0; i < args.length; i++) {
+          if (!obj.hasOwnProperty(args[i])) {
+            return false
+          }
+          obj = obj[args[i]]
+        }
+        return true
       }
+
+      let resolve = function(obj, path='') {
+        let args = path.split('.')
+        var current = obj
+        while(args.length) {
+          if(typeof current !== 'object') return undefined
+          current = current[args.shift()]
+        }
+        return current
+      }
+
+      if (req.path=="diff") {
+        req.height = (req.height!=0) ? req.height : (height - 1)
+        let [err, response] = await to(diffDb.get(req.height))
+        if (err) {
+          if (err.notFound) {
+            return { code: 3, log: 'diff not found' }
+          } else {
+            return { code: 2, log: 'invalid query: ' + err.message }
+          }
+        } else {
+          return {
+            value: Buffer.from(response),
+            height: req.height,
+            code: 0,
+            log: `path: '${req.path||'*'}', block: ${req.height}`
+          }
+        }
+      } else {
+        try {
+          let appState = stateMachine.query()
+          let state = { appState }
+          if (req.height != 0) {
+            state = JSON.parse(await storeDb.get(req.height))
+          } else {
+            req.height = height - 1
+          }
+
+          let response = state.appState
+          if (pathInObject(state.appState, req.path)) {
+            response = resolve(state.appState, req.path)
+          } else {
+            req.path = ''
+          }
+
+          return {
+            value: Buffer.from(djson.stringify(response)).toString('base64'),
+            height: req.height,
+            code: 0,
+            log: `path: 'state.${req.path||'*'}', block: ${req.height}`
+          }
+        } catch (err) {
+          if (err.notFound) {
+            return { code: 3, log: 'state not found' }
+          } else {
+            return { code: 2, log: 'invalid query: ' + err.message }
+          }
+        }
+      }
+
+      // let path = req.path
+      // let queryResponse: object = stateMachine.query(path)
+      // let value = Buffer.from(djson.stringify(queryResponse)).toString('base64')
+      //
+      // return {
+      //   value,
+      //   height
+      // }
     }
   })
 
