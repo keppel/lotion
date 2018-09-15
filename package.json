@@ -20,13 +20,11 @@
     "express-http-proxy": "^1.2.0",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
-    "jpfs": "0.0.3",
     "jsondiffpatch": "^0.3.11",
     "level": "^4.0.0",
     "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
     "lotion-state-machine": "git+https://github.com/ameeuw/lotion-state-machine.git",
     "npm": "^6.4.1",
-    "peer-channel": "^0.1.1",
     "tendermint-node": "^3.3.0",
     "toml": "^2.3.3",
     "toml-js": "0.0.8"

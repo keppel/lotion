@@ -8,7 +8,7 @@ import { join, resolve } from 'path'
 import { homedir } from 'os'
 import createABCIServer, { ABCIServer } from './abci-server'
 import createTendermintProcess from './tendermint'
-import createDiscoveryServer, { DiscoveryServer } from './discovery'
+// import createDiscoveryServer, { DiscoveryServer } from './discovery'
 import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
@@ -160,11 +160,11 @@ class LotionApp implements Application {
     this.setGCI()
 
     // start discovery server
-    this.discoveryServer = createDiscoveryServer({
-      GCI: this.GCI,
-      genesis: this.genesis,
-      rpcPort: this.ports.rpc
-    })
+    // this.discoveryServer = createDiscoveryServer({
+    //   GCI: this.GCI,
+    //   genesis: this.genesis,
+    //   rpcPort: this.ports.rpc
+    // })
 
     this.txServer = TxServer({
       port: this.ports.lotion,
