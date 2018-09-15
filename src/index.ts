@@ -86,7 +86,7 @@ class LotionApp implements Application {
     this.ports = {
       abci: this.config.abciPort || (await getPort()),
       p2p: this.config.p2pPort || (await getPort()),
-      rpc: this.config.rpcPort || (await getPort()),
+      rpc: this.config.rpcPort || 46657,
       lotion: this.config.lotionPort || 3000
     }
   }
