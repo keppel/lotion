@@ -75,11 +75,11 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       // console.log(JSON.stringify(lastState, null, 2))
       return { LastBlockAppHash: rootHash, LastBlockHeight: lastBlockHeight }
     },
-    async deliverTx(request) {
+    deliverTx(request) {
       try {
         let tx = decodeTx(request.tx)
         try {
-          await stateMachine.transition({ type: 'transaction', data: tx })
+          stateMachine.transition({ type: 'transaction', data: tx })
           return {}
         } catch (e) {
           return { code: 1, log: e.toString() }
@@ -88,11 +88,11 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         return { code: 1, log: 'Invalid transaction encoding' }
       }
     },
-    async checkTx(request) {
+    checkTx(request) {
       try {
         let tx = decodeTx(request.tx)
         try {
-          await stateMachine.check(tx)
+          stateMachine.check(tx)
           return {}
         } catch (e) {
           return { code: 1, log: e.toString() }
@@ -109,7 +109,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       return {}
     },
     async endBlock() {
-      await stateMachine.transition({ type: 'block', data: {} })
+      stateMachine.transition({ type: 'block', data: {} })
       let { validators } = stateMachine.info()
       let validatorUpdates = []
 
