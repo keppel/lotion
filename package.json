@@ -19,6 +19,6 @@
     "lotion-connect": "^0.1.3",
     "lotion-state-machine": "0.0.1",
     "peer-channel": "^0.1.1",
-    "tendermint-node": "^3.3.0"
+    "tendermint-node": "^3.4.0"
   }
 }
