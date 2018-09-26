@@ -1,11 +1,10 @@
 {
   "name": "lotion",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"no test specified\" && exit 0",
-    "install": "tsc"
+    "test": "ava"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
@@ -25,8 +24,8 @@
     "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
     "lotion-state-machine": "git+https://github.com/ameeuw/lotion-state-machine.git",
     "npm": "^6.4.1",
-    "tendermint-node": "^3.3.0",
     "toml": "^2.3.3",
     "toml-js": "0.0.8"
+    "tendermint-node": "^3.4.0"
   }
 }
