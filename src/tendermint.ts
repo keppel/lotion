@@ -51,7 +51,6 @@ export default async function createTendermintProcess({
    * disable authenticated encryption for p2p if
    * no peer strings containing ids are provided.
    */
-
   if (peers && peers.length > 0) {
     let shouldUseAuth = false
     peers.forEach(peer => {
@@ -115,7 +114,6 @@ export default async function createTendermintProcess({
     }
   }
   let tendermintProcess = tendermint.node(home, opts)
-
   if (logTendermint) {
     tendermintProcess.stdout.pipe(process.stdout)
     tendermintProcess.stderr.pipe(process.stderr)
@@ -123,6 +121,6 @@ export default async function createTendermintProcess({
   tendermintProcess.then(() => {
     console.log('tm exited')
   })
-  await tendermintProcess.started()
+  await tendermintProcess.synced()
   return {}
 }
