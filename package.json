@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"no test specified\" && exit 0",
-    "install": "tsc"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
