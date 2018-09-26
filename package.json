@@ -4,7 +4,8 @@
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "install": "tsc"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
