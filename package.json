@@ -12,7 +12,7 @@
   "dependencies": {
     "@types/node": "^10.5.2",
     "abci": "^4.0.0",
-    "deterministic-json": "^1.0.4",
+    "deterministic-json": "^1.0.5",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
     "jpfs": "0.0.3",
