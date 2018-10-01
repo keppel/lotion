@@ -11,12 +11,21 @@
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^10.5.2",
+    "@types/node": "^10.11.3",
     "abci": "^4.0.2",
+    "await-to-js": "^2.0.1",
+    "cors": "^2.8.4",
     "deterministic-json": "^1.0.5",
+    "express": "^4.16.3",
+    "express-http-proxy": "^1.4.0",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
+    "jsondiffpatch": "^0.3.11",
+    "level": "^4.0.0",
+    "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
     "lotion-state-machine": "git+https://github.com/ameeuw/lotion-state-machine.git",
-    "tendermint-node": "^3.4.0"
+    "tendermint-node": "^3.4.0",
+    "toml": "^2.3.3",
+    "toml-js": "0.0.8"
   }
 }
