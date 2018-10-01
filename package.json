@@ -11,13 +11,13 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^10.5.2",
-    "abci": "^4.0.0",
+    "abci": "^4.0.2",
     "deterministic-json": "^1.0.5",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
     "jpfs": "0.0.3",
-    "lotion-connect": "^0.1.3",
-    "lotion-state-machine": "0.0.1",
+    "lotion-connect": "^0.1.4",
+    "lotion-state-machine": "0.0.2",
     "peer-channel": "^0.1.1",
     "tendermint-node": "^3.4.0"
   },
