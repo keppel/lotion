@@ -1,6 +1,6 @@
 {
   "name": "lotion",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
@@ -12,21 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^10.5.2",
-    "abci": "^4.0.0",
-    "await-to-js": "^2.0.1",
-    "cors": "^2.8.4",
-    "deterministic-json": "^1.0.4",
-    "express": "^4.16.3",
-    "express-http-proxy": "^1.2.0",
+    "abci": "^4.0.2",
+    "deterministic-json": "^1.0.5",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
-    "jsondiffpatch": "^0.3.11",
-    "level": "^4.0.0",
-    "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
     "lotion-state-machine": "git+https://github.com/ameeuw/lotion-state-machine.git",
-    "npm": "^6.4.1",
-    "toml": "^2.3.3",
-    "toml-js": "0.0.8",
     "tendermint-node": "^3.4.0"
   }
 }
