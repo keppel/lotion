@@ -148,8 +148,8 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         // console.log(JSON.stringify(lastState.appState, null, 2))
         // console.log(`\nSTATE ${height}\n`)
         // console.log(JSON.stringify(appState, null, 2))
-        console.log(`\nDIFF ${lastBlockHeight} --> ${height}\n`)
-        console.log(JSON.stringify(diff, null, 2))
+        // console.log(`\nDIFF ${lastBlockHeight} --> ${height}\n`)
+        // console.log(JSON.stringify(diff, null, 2))
         let [err, response] = await to(diffDb.put(height, djson.stringify(diff)))
         if (err) console.log("Error saving diff.")
       }
