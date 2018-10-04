@@ -114,21 +114,24 @@ class LotionApp implements Application {
 
   private setHome() {
     /**
-     * if genesis is provided,
-     * home path is hash(genesisPath)
+     * if genesisPath or keyPath is provided,
+     * home path is hash(genesisPath, keyPath)
      *
      * otherwise a random id is generated.
      */
+    let homePath = createHash('sha256')
     if (this.config.genesisPath) {
-      this.home = join(
-        this.lotionHome,
-        createHash('sha256')
-          .update(resolve(this.config.genesisPath))
-          .digest('hex')
-      )
-    } else {
-      this.home = join(this.lotionHome, randomBytes(16).toString('hex'))
+      homePath.update(resolve(this.config.genesisPath))
     }
+    if (this.config.keyPath) {
+      homePath.update(resolve(this.config.keyPath))
+    }
+
+    if (!this.config.genesisPath && !this.config.keyPath) {
+      homePath.update(randomBytes(16).toString('hex'))
+    }
+
+    this.home = join(this.lotionHome, homePath.digest('hex'))
   }
 
   async start() {
