@@ -13,17 +13,22 @@ export interface ABCIServer {
 
 export default function createABCIServer(stateMachine, initialState, storeDb, diffDb): any {
   let height = 0
+
   let abciServer = createServer({
     async info(request) {
+      // console.log(JSON.stringify(request, null, 2))
       let appState = initialState
-      console.log(JSON.stringify(request, null, 2))
       let lastBlockHeight
+      let lastState
+      let rootHash
+
       try {
         lastBlockHeight = await storeDb.get('lastBlockHeight')
+        lastBlockHeight = parseInt(lastBlockHeight)
       } catch(err) {
         lastBlockHeight = 0
       }
-      let lastState
+
       try {
         lastState = JSON.parse(await storeDb.get(lastBlockHeight))
         console.log(`State found at ${lastBlockHeight}`)
@@ -31,18 +36,22 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         console.log(`No state found at ${lastBlockHeight}`)
         lastBlockHeight = 0
         lastState = { appState }
+        lastState.appHash = createHash('sha256')
+          .update(djson.stringify(lastState.appState))
+          .digest('hex')
       }
+
       // let rootHash = await getRoot(lastState.appState)
-      let rootHash = createHash('sha256')
+      rootHash = createHash('sha256')
         .update(djson.stringify(lastState.appState))
         .digest('hex')
       console.log(rootHash.toString())
       console.log(lastState.appHash)
 
       // Yes, this is really hacky - but for now its working :D
-      if (lastState.appHash == rootHash.toString()) {
+      if ( lastState.appHash == rootHash.toString() ) {
         console.log("ALL GOOD")
-        lastState = JSON.parse(await storeDb.get(lastBlockHeight))
+        // lastState = JSON.parse(await storeDb.get(lastBlockHeight+1))
       } else {
         console.log("NOT GOOD")
         try {
@@ -61,18 +70,22 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         console.log(lastState.appHash)
       }
 
-      rootHash = createHash('sha256')
-        .update(djson.stringify(lastState.appState))
-        .digest('hex')
-      // Object.assign(store, lastState.appState)
+      if (lastBlockHeight == 0) {
+        rootHash = Buffer.from('', 'hex')
+      } else {
+        stateMachine.initialize(lastState.appState, lastState.chainInfo)
+      }
+
+      // lastBlockHeight = lastBlockHeight+1
       height = lastBlockHeight
 
       console.log(`Continuing blockchain from:`)
       console.log(`lastBlockHeight: ${lastBlockHeight}`)
       console.log(`lastBlockAppHash: ${rootHash.toString()}`)
-      // console.log(JSON.stringify(lastState, null, 2))
-      return { LastBlockAppHash: rootHash, LastBlockHeight: lastBlockHeight }
+
+      return { lastBlockAppHash: Buffer.from(rootHash, 'hex'), lastBlockHeight: lastBlockHeight }
     },
+
     deliverTx(request) {
       try {
         let tx = decodeTx(request.tx)
@@ -122,6 +135,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         validatorUpdates
       }
     },
+
     async commit() {
       let appHash = stateMachine.commit()
       let appState = stateMachine.query()
@@ -148,7 +162,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         // console.log(JSON.stringify(appState, null, 2))
         // console.log(`\nDIFF ${lastBlockHeight} --> ${height}\n`)
         // console.log(JSON.stringify(diff, null, 2))
-        let [err, response] = await to(diffDb.put(height, djson.stringify(diff)))
+        let [err, response] = await to(diffDb.put((height+1), djson.stringify(diff)))
         if (err) console.log("Error saving diff.")
       }
 
