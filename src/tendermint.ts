@@ -109,7 +109,7 @@ export default async function createTendermintProcess({
      let content = fs.readFileSync(join(home, 'config', 'config.toml'))
      let tmToml = toml.parse(content)
      tmToml.consensus.create_empty_blocks_interval = emptyBlocksInterval
-     // tmToml.p2p.addr_book_strict = false
+     tmToml.p2p.addr_book_strict = false
      // tmToml.p2p.persistent_peers = peers.join(',')
      // tmToml.p2p.laddr = `tcp://0.0.0.0:${ports.p2p}`
      fs.writeFileSync(
