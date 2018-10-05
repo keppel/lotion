@@ -161,13 +161,6 @@ class LotionApp implements Application {
     this.setGenesis()
     this.setGCI()
 
-    // start discovery server
-    // this.discoveryServer = createDiscoveryServer({
-    //   GCI: this.GCI,
-    //   genesis: this.genesis,
-    //   rpcPort: this.ports.rpc
-    // })
-
     this.txServer = TxServer({
       port: this.ports.lotion,
       rpcPort: this.ports.rpc,
