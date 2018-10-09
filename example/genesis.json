@@ -1,0 +1,25 @@
+{
+  "genesis_time": "0001-01-01T00:00:00Z",
+  "chain_id": "test-chain-1337-local",
+  "validators": [
+    {
+      "ip": "127.0.0.1",
+      "pub_key": {
+        "value":"9aJJ1xXA2Bm+3aS/PCMOOTJ9Q2H6iESREYN5K6RVrbo=",
+        "type":"tendermint/PubKeyEd25519"
+      },
+      "power":"10",
+      "name":""
+    },
+    {
+      "ip": "127.0.0.1",
+      "pub_key": {
+        "value":"oBVC8zkzCB7KDEwC1opoR/YurbWbLUegOF6dp8S9TV8=",
+        "type":"tendermint/PubKeyEd25519"
+      },
+      "power":"10",
+      "name":""
+    }
+  ],
+  "app_hash": ""
+}
