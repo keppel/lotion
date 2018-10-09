@@ -64,11 +64,6 @@ export default async function createTendermintProcess({
     })
 
     if (!shouldUseAuth) {
-      // let cfgPath = join(home, 'config', 'config.toml')
-      // let configToml = fs.readFileSync(cfgPath, 'utf8')
-      // configToml = configToml.replace('auth_enc = true', 'auth_enc = false')
-      // fs.writeFileSync(cfgPath, configToml)
-
       /**
        * tendermint currently requires a node id even if auth_enc is off.
        * prepend a bogus node id for all peers without an id.
@@ -80,8 +75,6 @@ export default async function createTendermintProcess({
         }
       })
     }
-
-    opts.p2p.persistentPeers = peers.join(',')
   }
 
   /**
@@ -105,22 +98,25 @@ export default async function createTendermintProcess({
    * priv_validator.json as a safeguard against accidental double-signing.
    */
 
+   let content = fs.readFileSync(join(home, 'config', 'config.toml'))
+   let tmToml = toml.parse(content)
    if (emptyBlocksInterval>0) {
-     let content = fs.readFileSync(join(home, 'config', 'config.toml'))
-     let tmToml = toml.parse(content)
      tmToml.consensus.create_empty_blocks_interval = emptyBlocksInterval
-     tmToml.p2p.addr_book_strict = false
-     tmToml.p2p.persistent_peers = peers.join(',')
-     tmToml.p2p.auth_enc = false
-     tmToml.p2p.seeds = peers.join(',')
-
-     // tmToml.p2p.laddr = `tcp://0.0.0.0:${ports.p2p}`
-     fs.writeFileSync(
-       join(home, 'config', 'config.toml'),
-       tomljs.dump(tmToml)
-     )
-     console.log("Written to config.toml")
    }
+
+   tmToml.rpc.laddr = `tcp://0.0.0.0:${ports.rpc}`
+
+   tmToml.p2p.addr_book_strict = false
+   tmToml.p2p.persistent_peers = peers.join(',')
+   tmToml.p2p.seeds = peers.join(',')
+   tmToml.p2p.auth_enc = false
+   tmToml.p2p.laddr = `tcp://0.0.0.0:${ports.p2p}`
+
+   fs.writeFileSync(
+     join(home, 'config', 'config.toml'),
+     tomljs.dump(tmToml)
+   )
+   console.log("Written to config.toml")
 
   if (keyPath) {
     let privValPath = join(home, 'config', 'priv_validator.json')
