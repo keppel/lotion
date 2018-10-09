@@ -3,15 +3,15 @@ Description=TestValidator
 After=network.target
 
 [Service]
-ExecStart=/home/pi/qs/platform/example/run_node.sh
+ExecStart=/home/pi/qs/lotion/example0/run_node.sh
 Restart=always
 User=pi
 # Use 'nogroup' group for Ubuntu/Debian
 # use 'nobody' group for Fedora
 Group=nogroup
-Environment=PATH=/usr/bin:/usr/local/bin
+Environment=PATH=/usr/local/bin
 Environment=NODE_ENV=production
-WorkingDirectory=/home/pi/qs/platform/example
+WorkingDirectory=/home/pi/lotion/example0
 
 [Install]
 WantedBy=multi-user.target
