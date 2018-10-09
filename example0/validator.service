@@ -1,0 +1,17 @@
+[Unit]
+Description=TestValidator
+After=network.target
+
+[Service]
+ExecStart=/home/pi/qs/platform/example/run_node.sh
+Restart=always
+User=pi
+# Use 'nogroup' group for Ubuntu/Debian
+# use 'nobody' group for Fedora
+Group=nogroup
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/home/pi/qs/platform/example
+
+[Install]
+WantedBy=multi-user.target
