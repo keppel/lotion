@@ -1,26 +1,49 @@
 let lotion = require('../dist/index')
 
-console.log(`Keys: ${process.argv[2]}`)
-console.log(`Genesis: ${process.argv[3]}`)
+
+let keyPath = process.argv[2]
+let genesisPath = process.argv[3]
+let rpcPort = process.argv[4]
+let p2pPort = process.argv[5]
+let lotionPort = process.argv[6]
+let peers = JSON.parse(process.argv[7] || "[]")
+
+console.log(`Keys: ${keyPath}`)
+console.log(`Genesis: ${genesisPath}`)
+console.log(`RPC: ${rpcPort}`)
+console.log(`P2P: ${p2pPort}`)
+console.log(`Lotion: ${lotionPort}`)
+console.log(`Peers: ${peers}`)
 
 let app = lotion({
-  keyPath: process.argv[2],
-  genesisPath: process.argv[3],
-  peers: ['192.168.1.100:46660', '192.168.1.101:46660', '192.168.1.102:46660'],
-  rpcPort: 46657,
-  p2pPort: 46660,
-  lotionPort: 3000,
+  keyPath,
+  genesisPath,
+  peers,
+  rpcPort,
+  p2pPort,
+  lotionPort,
   logTendermint: false,
   emptyBlocksInterval: 12,
   devMode: false,
   initialState: {
-    count: 0
+    registry: {
+      count: 0,
+      accounts: {},
+      posts: {}
+    }
   }
 })
 
 app.use(function(state, tx) {
-  if (state.count === tx.nonce) {
-    state.count++
+  if (tx.sender) {
+    if (!state.registry.accounts[sender]) {
+      state.registry.accounts[sender] = {
+        nonce: 0
+      }
+    }
+    if (state.registry.accounts[sender].nonce === tx.nonce) {
+      state.registry.accounts[sender].nonce++
+    }
   }
 })
 
@@ -28,6 +51,7 @@ app.use(function(state, tx) {
 
 app.useBlock(function(state, chainInfo) {
   console.log(`Blocktime: ${chainInfo.time}`)
+  console.log(`Height: ${chainInfo.height}`)
 })
 
 app.start().then(console.log)
