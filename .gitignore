@@ -6,3 +6,4 @@ dist/
 .idea
 coverage
 *.lcov
+.DS_Store
