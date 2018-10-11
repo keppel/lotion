@@ -121,7 +121,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
     },
     async endBlock() {
       stateMachine.transition({ type: 'block', data: {} })
-      let { validators } = stateMachine.info()
+      let { validators } = stateMachine.context()
       let validatorUpdates = []
 
       for (let pubKey in validators) {
