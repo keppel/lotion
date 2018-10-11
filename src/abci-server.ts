@@ -139,7 +139,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
     async commit() {
       let appHash = stateMachine.commit()
       let appState = stateMachine.query()
-      let chainInfo = stateMachine.info()
+      let chainInfo = stateMachine.context()
 
       let lastBlockHeight
       try {

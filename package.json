@@ -24,7 +24,7 @@
     "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
     "level": "^4.0.0",
     "toml": "^2.3.3",
-    "toml-js": "0.0.8"
+    "toml-js": "0.0.8",
     "tendermint-node": "^3.4.0",
     "lotion-state-machine": "0.0.5"
   }
