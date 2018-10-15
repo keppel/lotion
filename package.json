@@ -21,7 +21,7 @@
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
     "jsondiffpatch": "^0.3.11",
-    "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git#develop",
+    "lotion-connect": "git+https://github.com/ameeuw/lotion-connect.git",
     "level": "^4.0.0",
     "toml": "^2.3.3",
     "toml-js": "0.0.8",
