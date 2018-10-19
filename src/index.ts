@@ -8,7 +8,6 @@ import { join, resolve } from 'path'
 import { homedir } from 'os'
 import createABCIServer, { ABCIServer } from './abci-server'
 import createTendermintProcess from './tendermint'
-// import createDiscoveryServer, { DiscoveryServer } from './discovery'
 import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
@@ -42,11 +41,10 @@ interface AppInfo {
   genesisPath: string
 }
 
-class LotionApp implements Application {
+export class LotionApp implements Application {
   private stateMachine: StateMachine
   private application: Application
   private abciServer: ABCIServer
-  // private discoveryServer: DiscoveryServer
   private tendermintProcess
   private ports: PortMap
   private genesis: string
@@ -181,4 +179,4 @@ let Lotion: any = function(config) {
 }
 
 Lotion.connect = require('lotion-connect')
-export = Lotion
+export { Lotion }
