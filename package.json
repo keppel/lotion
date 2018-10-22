@@ -4,8 +4,10 @@
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc --p tsconfig.json",
     "test": "ava"
   },
+  "types": "./index.d.ts",
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",

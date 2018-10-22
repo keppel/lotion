@@ -13,7 +13,7 @@ import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
 
-interface ApplicationConfig extends BaseApplicationConfig {
+export interface ApplicationConfig extends BaseApplicationConfig {
   rpcPort?: number
   p2pPort?: number
   abciPort?: number
@@ -23,19 +23,19 @@ interface ApplicationConfig extends BaseApplicationConfig {
   peers?: Array<string>
 }
 
-interface PortMap {
+export interface PortMap {
   abci: number
   p2p: number
   rpc: number
 }
 
-interface AppInfo {
+export interface AppInfo {
   ports: PortMap
   GCI: string
   genesisPath: string
 }
 
-class LotionApp implements Application {
+export class LotionApp implements Application {
   private stateMachine: StateMachine
   private application: Application
   private abciServer: ABCIServer
@@ -154,9 +154,9 @@ class LotionApp implements Application {
   }
 }
 
-let Lotion: any = function(config) {
+export const Lotion = (config: ApplicationConfig): LotionApp => {
   return new LotionApp(config)
 }
 
 Lotion.connect = require('lotion-connect')
-export = Lotion
+export default Lotion

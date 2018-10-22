@@ -51,9 +51,9 @@ $ npm install lotion
 `app.js`:
 
 ```js
-let lotion = require('lotion')
+let Lotion = require('lotion')
 
-let app = lotion({
+let app = Lotion({
   initialState: {
     count: 0
   }
@@ -71,17 +71,35 @@ app.start().then(console.log)
 run `node app.js`, note your app's id (GCI), then in a separate node process:
 
 ```js
-let { connect } = require('lotion')
-let GCI = '<put app GCI here>'
+let { Lotion } = require('lotion')
+let GCI = '709967c186f049a01021c29ea0e2b2402f1055757ce77c2988198d9b5e7f2737'
 
 async function main() {
-  let { state, send } = await connect(GCI)
+  let { state, send } = await Lotion.connect(GCI)
   console.log(await state) // { count: 0 }
   console.log(await send({ nonce: 0 })) // { ok: true }
   console.log(await state) // { count: 1 }
 }
 
 main()
+```
+## TypeScript Support
+
+```ts
+import { Lotion, ApplicationConfig } from 'lotion'
+
+const options: ApplicationConfig = {
+  initialState: { count: 0 },
+  rpcPort: 2001,
+  p2pPort: 46658,
+  abciPort: 46657,
+  logTendermint: true,
+  keyPath: './keys.json',
+  genesisPath: './genesis.json',
+  peers: []
+}
+
+const app = Lotion(options)
 ```
 
 ## Introduction
@@ -143,7 +161,7 @@ Contributions of any kind welcome!
 
 ## API
 
-### `let app = require('lotion')(opts)`
+### `let app = Lotion(opts)`
 
 Create a new Lotion app.
 
@@ -151,14 +169,14 @@ Here are the available options for `opts` which you can override:
 
 ```js
 {
-  devMode: false,       // set this true to wipe blockchain data between runs
-  initialState: {},     // initial blockchain state
-  keyPath: './keys.json',             // path to keys.json. generates own keys if not specified.
-  genesisPath: './genesis.json',          // path to genesis.json. generates new one if not specified.
-  peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
-  logTendermint: false, // if true, shows all output from the underlying tendermint process
-  p2pPort: 46658,       // port to use for tendermint peer connections
-  tendermintPort: 46657 // port to use for tendermint rpc
+  initialState: { count: 0 },     // initial blockchain state
+  rpcPort: 2001,                  // port to use for tendermint rpc 
+  p2pPort: 46658,                 // port to use for tendermint peer connections
+  abciPort: 46657,                // the abci port
+  logTendermint: true,            // if true, shows all output from the underlying tendermint process
+  keyPath: './keys.json',         // path to keys.json. generates own keys if not specified.
+  genesisPath: './genesis.json',  // path to genesis.json. generates new one if not specified.
+  peers: []                       // array of '<host>:<p2pport>' of initial tendermint nodes to connect to.
 }
 ```
 
@@ -199,10 +217,10 @@ Starts your app.
 Lotion apps each have a unique global chain identifier (GCI). You can light client verify any running Lotion app from any computer in the world as long as you know its GCI.
 
 ```js
-let { connect } = require('lotion')
+let { Lotion } = require('lotion')
 let GCI = '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
 
-let { state, send } = await connect(GCI)
+let { state, send } = await Lotion.connect(GCI)
 
 let count = await state.count
 console.log(count) // 0
@@ -221,7 +239,8 @@ It's also used as the rendezvous point with peers on the bittorrent dht and thro
 You can get the GCI of an app being run by a full node like this:
 
 ```js
-let app = require('lotion')({ initialState: { count: 0 } })
+let { Lotion } = require('lotion')
+let app = Lotion({ initialState: { count: 0 } })
 
 let { GCI } = await app.start()
 console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
