@@ -206,6 +206,16 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
     async query(req) {
       console.log(JSON.stringify(req, null, 2))
 
+      let data = ''
+      if (req.data) {
+        try {
+          data = Buffer.from(req.data, 'base64').toString()
+        }
+        catch (error) {
+          console.log(error)
+        }
+      }
+
       let pathInObject = function(obj, path='') {
         let args = path.split('.')
         for (var i = 0; i < args.length; i++) {
@@ -227,7 +237,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
         return current
       }
 
-      if (req.path=="diff") {
+      if (req.path=="diff" || data=="diff") {
         req.height = (req.height!=0) ? req.height : (height - 1)
         let [err, response] = await to(diffDb.get(req.height))
         if (err) {
@@ -237,11 +247,18 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
             return { code: 2, log: 'invalid query: ' + err.message }
           }
         } else {
+          response = djson.parse(response)
+          if (pathInObject(response, req.path)) {
+            response = resolve(response, req.path)
+          } else {
+            req.path = ''
+          }
+
           return {
-            value: Buffer.from(response),
+            value: Buffer.from(djson.stringify(response)).toString('base64'),
             height: req.height,
             code: 0,
-            log: `path: '${req.path||'*'}', block: ${req.height}`
+            log: `path: '${req.path||'*'}', block: ${req.height}, data:${data}`
           }
         }
       } else {
