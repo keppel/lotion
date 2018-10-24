@@ -101,7 +101,9 @@ export default async function createTendermintProcess({
    let content = fs.readFileSync(join(home, 'config', 'config.toml'))
    let tmToml = toml.parse(content)
    if (emptyBlocksInterval>0) {
-     tmToml.consensus.create_empty_blocks_interval = emptyBlocksInterval
+     // tmToml.consensus.create_empty_blocks_interval = emptyBlocksInterval
+     tmToml.consensus.create_empty_blocks_interval = 0
+     tmToml.consensus.timeout_commit = emptyBlocksInterval*1000
    }
 
    tmToml.rpc.laddr = `tcp://0.0.0.0:${ports.rpc}`
