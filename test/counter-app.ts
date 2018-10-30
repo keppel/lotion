@@ -1,8 +1,7 @@
-import Lotion from '../src/index'
+import { Lotion } from '../src'
 
-let app = Lotion({
+let app = new Lotion({
   initialState: { count: 0, blockCount: 0 },
-  // logTendermint: true,
   rpcPort: 25555
 })
 

@@ -1,4 +1,4 @@
-let { connect } = require('../src/index')
+import { connect } from '../src'
 
 async function main() {
   let { state, send } = await connect(process.env.GCI)

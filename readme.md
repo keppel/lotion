@@ -51,9 +51,9 @@ $ npm install lotion
 `app.js`:
 
 ```js
-let Lotion = require('lotion')
+let lotion = require('lotion')
 
-let app = Lotion({
+let app = lotion({
   initialState: {
     count: 0
   }
@@ -71,11 +71,11 @@ app.start().then(console.log)
 run `node app.js`, note your app's id (GCI), then in a separate node process:
 
 ```js
-let { Lotion } = require('lotion')
-let GCI = '709967c186f049a01021c29ea0e2b2402f1055757ce77c2988198d9b5e7f2737'
+let { connect } = require('lotion')
+let GCI = '<put app GCI here>'
 
 async function main() {
-  let { state, send } = await Lotion.connect(GCI)
+  let { state, send } = await connect(GCI)
   console.log(await state) // { count: 0 }
   console.log(await send({ nonce: 0 })) // { ok: true }
   console.log(await state) // { count: 1 }
@@ -99,7 +99,22 @@ const options: ApplicationConfig = {
   peers: []
 }
 
-const app = Lotion(options)
+const app = new Lotion(options)
+```
+
+```ts
+import { connect } from 'lotion'
+
+const GCI = '<put app GCI here>'
+
+const main = async () => {
+    const { state, send } = await connect(GCI)
+    console.log(await state) // { count: 0 }
+    console.log(await send({ nonce: 0 })) // { ok: true }
+    console.log(await state) // { count: 1 }
+}
+
+main()
 ```
 
 ## Introduction
@@ -161,7 +176,7 @@ Contributions of any kind welcome!
 
 ## API
 
-### `let app = Lotion(opts)`
+### `let app = lotion(opts)`
 
 Create a new Lotion app.
 
@@ -217,10 +232,10 @@ Starts your app.
 Lotion apps each have a unique global chain identifier (GCI). You can light client verify any running Lotion app from any computer in the world as long as you know its GCI.
 
 ```js
-let { Lotion } = require('lotion')
-let GCI = '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'
+let { connect } = require('lotion')
+let GCI = '<put app GCI here>'
 
-let { state, send } = await Lotion.connect(GCI)
+let { state, send } = await connect(GCI)
 
 let count = await state.count
 console.log(count) // 0
@@ -239,8 +254,8 @@ It's also used as the rendezvous point with peers on the bittorrent dht and thro
 You can get the GCI of an app being run by a full node like this:
 
 ```js
-let { Lotion } = require('lotion')
-let app = Lotion({ initialState: { count: 0 } })
+let lotion = require('lotion')
+let app = lotion({ initialState: { count: 0 } })
 
 let { GCI } = await app.start()
 console.log(GCI) // '6c94c1f9d653cf7e124b3ec57ded2589223a96416921199bbf3ef3ca610ffceb'

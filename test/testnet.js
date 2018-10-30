@@ -1,6 +1,7 @@
 let test = require('ava')
 let getPort = require('get-port')
-let { Lotion } = require('../')
+let lotion = require('../')
+let { connect } = require('../')
 let { RpcClient } = require('tendermint')
 
 function startApp({
@@ -10,7 +11,7 @@ function startApp({
   p2pPort,
   logTendermint = false
 }) {
-  let app = Lotion({
+  let app = lotion({
     initialState: {
       txCount: 0,
       blockCount: 0,
@@ -66,14 +67,14 @@ test('counter app testnet', async function(t) {
   let bPubKey = status.validator_info.pub_key.value
   t.true(status.sync_info.latest_block_height > 1)
 
-  let alc = await Lotion.connect(
+  let alc = await connect(
     null,
     {
       genesis: require(a.genesisPath),
       nodes: [`ws://localhost:${nodeA.rpcPort}`]
     }
   )
-  let blc = await Lotion.connect(
+  let blc = await connect(
     null,
     {
       genesis: require(a.genesisPath),
