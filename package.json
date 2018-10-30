@@ -7,7 +7,6 @@
     "build": "tsc --p tsconfig.json",
     "test": "ava"
   },
-  "types": "./index.d.ts",
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
