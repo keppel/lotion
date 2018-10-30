@@ -18,7 +18,7 @@ function lotion (config: lotion.ApplicationConfig): any  {
 }
 
 namespace lotion {
-	export let connect
+	export let connect = require('lotion-connect')
 	export interface ApplicationConfig extends BaseApplicationConfig {
 		rpcPort?: number
 		p2pPort?: number
@@ -159,5 +159,4 @@ namespace lotion {
 	}
 }
 
-lotion.connect = require('lotion-connect')
 export = lotion
