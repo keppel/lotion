@@ -157,7 +157,7 @@ Transaction handlers must be deterministic: for a given set of `state`/`tx`/`cha
 
 ```js
 {
-  time: 42, // number of blocks committed so far. u.
+  time: 1541415248, // timestamp of the latest block. (unix seconds)
   validators: {
     '<base64-encoded pubkey>' : 20, // voting power distribution for validators. requires understanding tendermint.
     '<other pubkey>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
