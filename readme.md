@@ -65,23 +65,7 @@ app.use(function(state, tx) {
   }
 })
 
-app.start().then(console.log)
-```
-
-run `node app.js`, note your app's id (GCI), then in a separate node process:
-
-```js
-let { connect } = require('lotion')
-let GCI = '<put app GCI here>'
-
-async function main() {
-  let { state, send } = await connect(GCI)
-  console.log(await state) // { count: 0 }
-  console.log(await send({ nonce: 0 })) // { ok: true }
-  console.log(await state) // { count: 1 }
-}
-
-main()
+app.start()
 ```
 
 ## Introduction
@@ -151,14 +135,13 @@ Here are the available options for `opts` which you can override:
 
 ```js
 {
-  devMode: false,       // set this true to wipe blockchain data between runs
-  initialState: {},     // initial blockchain state
-  keyPath: './keys.json',             // path to keys.json. generates own keys if not specified.
-  genesisPath: './genesis.json',          // path to genesis.json. generates new one if not specified.
-  peers: [],            // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
-  logTendermint: false, // if true, shows all output from the underlying tendermint process
-  p2pPort: 46658,       // port to use for tendermint peer connections
-  tendermintPort: 46657 // port to use for tendermint rpc
+  initialState: {},            // initial blockchain state
+  keyPath: 'keys.json',        // path to keys.json. generates own keys if not specified.
+  genesisPath: 'genesis.json', // path to genesis.json. generates new one if not specified.
+  peers: [],                   // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
+  logTendermint: false,        // if true, shows all output from the underlying tendermint process
+  p2pPort: 46658,              // port to use for tendermint peer connections
+  rpcPort: 46657        // port to use for tendermint rpc
 }
 ```
 
@@ -174,10 +157,10 @@ Transaction handlers must be deterministic: for a given set of `state`/`tx`/`cha
 
 ```js
 {
-  height: 42, // number of blocks committed so far. usually 1 new block per second.
+  time: 42, // number of blocks committed so far. u.
   validators: {
-    '<some base64-encoded pubkey>' : 20, // voting power distribution for validators. requires understanding tendermint.
-    '<other pubkey in base64>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
+    '<base64-encoded pubkey>' : 20, // voting power distribution for validators. requires understanding tendermint.
+    '<other pubkey>': 147 // it's ok if you're not sure what this means, this is usually hidden from you.
   }
 }
 ```
