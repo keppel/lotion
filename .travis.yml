@@ -5,7 +5,7 @@ install:
   - npm install -g codecov
   - npm install -g nyc
   - npm install -g tape
-  - npm install -g tsc
+  - npm install -g typescript
   - npm install
 script:
   - tsc
