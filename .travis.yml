@@ -5,7 +5,9 @@ install:
   - npm install -g codecov
   - npm install -g nyc
   - npm install -g tape
+  - npm install -g tsc
   - npm install
 script:
+  - tsc
   - npm test
   - npm run report-coverage
