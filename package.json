@@ -1,25 +1,27 @@
 {
   "name": "lotion",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"no test specified\" && exit 0",
-    "install": "tsc"
+    "test": "ava"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^10.5.2",
-    "abci": "^4.0.0",
-    "deterministic-json": "^1.0.4",
+    "abci": "^4.0.2",
+    "deterministic-json": "^1.0.5",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
     "jpfs": "0.0.3",
-    "lotion-connect": "^0.1.3",
-    "lotion-state-machine": "0.0.1",
+    "lotion-connect": "^0.1.5",
+    "lotion-state-machine": "0.0.5",
     "peer-channel": "^0.1.1",
-    "tendermint-node": "^3.3.0"
+    "tendermint-node": "^3.4.0"
+  },
+  "devDependencies": {
+    "ava": "^0.25.0"
   }
 }
