@@ -10,4 +10,3 @@ install:
 script:
   - tsc
   - npm test
-  - npm run report-coverage
