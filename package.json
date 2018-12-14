@@ -19,7 +19,8 @@
     "lotion-connect": "^0.1.5",
     "lotion-state-machine": "0.0.5",
     "peer-channel": "^0.1.1",
-    "tendermint-node": "^3.4.0"
+    "tendermint-node": "^3.4.0",
+    "varstruct": "^6.1.2"
   },
   "devDependencies": {
     "ava": "^0.25.0"
