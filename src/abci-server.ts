@@ -204,7 +204,7 @@ export default function createABCIServer(stateMachine, initialState, storeDb, di
       return {}
     },
     async query(req) {
-      console.log(JSON.stringify(req, null, 2))
+      // console.log(JSON.stringify(req, null, 2))
 
       let data = ''
       if (req.data) {
