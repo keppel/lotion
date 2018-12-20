@@ -1,9 +1,10 @@
 {
   "name": "lotion",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
+    "publish": "tsc",
     "test": "ava"
   },
   "keywords": [],
@@ -17,11 +18,12 @@
     "get-port": "^4.0.0",
     "jpfs": "0.0.3",
     "lotion-connect": "^0.1.5",
-    "lotion-state-machine": "0.0.5",
+    "lotion-state-machine": "^0.1.1",
     "peer-channel": "^0.1.1",
     "tendermint-node": "^3.4.0"
   },
   "devDependencies": {
-    "ava": "^0.25.0"
+    "ava": "^0.25.0",
+    "typescript": "^3.2.2"
   }
 }
