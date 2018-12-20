@@ -4,6 +4,7 @@
   "description": "smooth, easy blockchain apps. powered by tendermint consensus.",
   "main": "dist/index.js",
   "scripts": {
+    "publish": "tsc",
     "test": "ava"
   },
   "keywords": [],
@@ -22,6 +23,7 @@
     "tendermint-node": "^3.4.0"
   },
   "devDependencies": {
-    "ava": "^0.25.0"
+    "ava": "^0.25.0",
+    "typescript": "^3.2.2"
   }
 }
