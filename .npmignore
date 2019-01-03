@@ -6,3 +6,7 @@ node_modules/
 coverage
 *.lcov
 test/
+docs/
+src/
+.allcontributorsrc
+.travis.yml
