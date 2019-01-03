@@ -22,7 +22,7 @@ export default function createABCIServer(
       return new Promise(async (resolve, reject) => {
         await fs.ensureFile(stateFilePath)
         try {
-          let stateFile = await fs.readJson(stateFilePath, 'utf8')
+          let stateFile = djson.parse(await fs.readFile(stateFilePath, 'utf8'))
           let rootHash = createHash('sha256')
             .update(djson.stringify(stateFile.state))
             .digest()
@@ -89,11 +89,14 @@ export default function createABCIServer(
     commit() {
       return new Promise(async (resolve, reject) => {
         let data = stateMachine.commit()
-        await fs.writeJson(stateFilePath, {
-          state: stateMachine.query(),
-          height: height,
-          context: stateMachine.context()
-        })
+        await fs.writeFile(
+          stateFilePath,
+          djson.stringify({
+            state: stateMachine.query(),
+            height: height,
+            context: stateMachine.context()
+          })
+        )
         resolve({ data: Buffer.from(data, 'hex') })
       })
     },
