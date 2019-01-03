@@ -27,7 +27,7 @@ export default function createABCIServer(
             .update(djson.stringify(stateFile.state))
             .digest()
 
-          stateMachine.initialize(stateFile.state, stateFile.context)
+          stateMachine.initialize(stateFile.state, stateFile.context, true)
           height = stateFile.height
           resolve({
             lastBlockAppHash: rootHash,
