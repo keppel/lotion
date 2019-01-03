@@ -4,7 +4,7 @@ import buildApplication, {
   Application
 } from 'lotion-state-machine'
 
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { homedir } from 'os'
 import createABCIServer, { ABCIServer } from './abci-server'
 import createTendermintProcess from './tendermint'
@@ -109,8 +109,8 @@ class LotionApp implements Application {
       this.home = join(
         this.lotionHome,
         createHash('sha256')
-          .update(resolve(this.config.genesisPath))
-          .update(resolve(this.config.keyPath))
+          .update(fs.readFileSync(this.config.genesisPath))
+          .update(fs.readFileSync(this.config.keyPath))
           .digest('hex')
       )
     } else {
@@ -125,7 +125,11 @@ class LotionApp implements Application {
     // start state machine
     this.stateMachine = this.application.compile()
 
-    this.abciServer = createABCIServer(this.stateMachine, this.initialState)
+    this.abciServer = createABCIServer(
+      this.stateMachine,
+      this.initialState,
+      this.home
+    )
     this.abciServer.listen(this.ports.abci)
 
     // start tendermint process
