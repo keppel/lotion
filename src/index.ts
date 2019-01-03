@@ -125,7 +125,11 @@ class LotionApp implements Application {
     // start state machine
     this.stateMachine = this.application.compile()
 
-    this.abciServer = createABCIServer(this.stateMachine, this.initialState)
+    this.abciServer = createABCIServer(
+      this.stateMachine,
+      this.initialState,
+      this.home
+    )
     this.abciServer.listen(this.ports.abci)
 
     // start tendermint process

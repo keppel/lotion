@@ -2,17 +2,43 @@ import djson = require('deterministic-json')
 import vstruct = require('varstruct')
 
 let createServer = require('abci')
+let { createHash } = require('crypto')
+let fs = require('fs-extra')
+let { join } = require('path')
 
 export interface ABCIServer {
   listen(port)
 }
 
-export default function createABCIServer(stateMachine, initialState): any {
+export default function createABCIServer(
+  stateMachine,
+  initialState,
+  lotionAppHome
+): any {
+  let stateFilePath = join(lotionAppHome, 'state.json')
   let height = 0
   let abciServer = createServer({
     info(request) {
-      return {}
+      return new Promise(async (resolve, reject) => {
+        await fs.ensureFile(stateFilePath)
+        try {
+          let stateFile = await fs.readJson(stateFilePath, 'utf8')
+          let rootHash = createHash('sha256')
+            .update(djson.stringify(stateFile.state))
+            .digest()
+
+          stateMachine.initialize(stateFile.state, stateFile.context)
+          height = stateFile.height
+          resolve({
+            lastBlockAppHash: rootHash,
+            lastBlockHeight: stateFile.height
+          })
+        } catch (e) {
+          resolve({})
+        }
+      })
     },
+
     deliverTx(request) {
       try {
         let tx = decodeTx(request.tx)
@@ -41,7 +67,6 @@ export default function createABCIServer(stateMachine, initialState): any {
     },
     beginBlock(request) {
       let time = request.header.time.seconds.toNumber()
-
       stateMachine.transition({ type: 'begin-block', data: { time } })
       return {}
     },
@@ -62,8 +87,15 @@ export default function createABCIServer(stateMachine, initialState): any {
       }
     },
     commit() {
-      let data = stateMachine.commit()
-      return { data: Buffer.from(data, 'hex') }
+      return new Promise(async (resolve, reject) => {
+        let data = stateMachine.commit()
+        await fs.writeJson(stateFilePath, {
+          state: stateMachine.query(),
+          height: height,
+          context: stateMachine.context()
+        })
+        resolve({ data: Buffer.from(data, 'hex') })
+      })
     },
     initChain(request) {
       /**
