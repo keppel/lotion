@@ -20,7 +20,7 @@
     "lotion-connect": "^0.1.5",
     "lotion-state-machine": "^0.2.0",
     "peer-channel": "^0.1.1",
-    "tendermint-node": "^3.4.0"
+    "tendermint-node": "^3.5.0"
   },
   "devDependencies": {
     "ava": "^0.25.0",
