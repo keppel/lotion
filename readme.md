@@ -140,8 +140,8 @@ Here are the available options for `opts` which you can override:
   genesisPath: 'genesis.json', // path to genesis.json. generates new one if not specified.
   peers: [],                   // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
   logTendermint: false,        // if true, shows all output from the underlying tendermint process
-  p2pPort: 46658,              // port to use for tendermint peer connections
-  rpcPort: 46657        // port to use for tendermint rpc
+  p2pPort: 26658,              // port to use for tendermint peer connections
+  rpcPort: 26657        // port to use for tendermint rpc
 }
 ```
 
