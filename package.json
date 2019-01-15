@@ -16,10 +16,10 @@
     "deterministic-json": "^1.0.5",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
-    "jpfs": "0.0.3",
+    "jpfs": "0.0.4",
     "lotion-connect": "^0.1.5",
     "lotion-state-machine": "^0.2.0",
-    "peer-channel": "^0.1.1",
+    "peer-channel": "^0.1.2",
     "tendermint-node": "^3.5.0"
   },
   "devDependencies": {
