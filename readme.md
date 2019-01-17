@@ -80,10 +80,6 @@ A Lotion application is often a single function of signature `(state, tx)` which
 
 This cosmic wizardry is made possible by a magic piece of software named [Tendermint](https://github.com/tendermint/tendermint) which exists specifically for synchronizing state machines across networks.
 
-<p align="center">
-  <a href="https://github.com/keppel/lotion"><img src="https://lotionjs.com/img/tm-blue.png" alt="Lotion" width="200" /></a>
-</p>
-
 ### Blockchains and Tendermint
 
 The goal of a blockchain is to represent a single state being concurrently edited. In order to avoid conflicts between concurrent edits, it represents the state as a ledger: a series of transformations (transactions) applied to an initial state. The blockchain must allow all connected nodes to agree about which transformations are valid, and their ordering within the ledger.
@@ -102,11 +98,8 @@ The **transaction** protocol describes what makes transactions valid, and how th
 
 | name                                                 | description                              |
 | ---------------------------------------------------- | ---------------------------------------- |
-| [lotion-chat](https://github.com/keppel/lotion-chat) | chat and collaborative haikus on lotion  |
-| [lotion-coin](https://github.com/keppel/lotion-coin) | early cryptocurrency prototype           |
 | [coins](https://github.com/mappum/coins)             | fully-featured cryptocurrency middleware |
 | [htlc](https://github.com/mappum/htlc)               | hashed timelock contracts on coins       |
-| [testnet](https://github.com/keppel/testnet)         | single-command testnet deployment        |
 | [shea](https://github.com/keppel/shea)               | on-chain client code management          |
 | [merk](https://github.com/mappum/merk)               | merkle AVL trees in javascript           |
 
