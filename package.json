@@ -25,7 +25,10 @@
   },
   "devDependencies": {
     "ava": "^0.25.0",
-    "typescript": "^3.2.2"
+    "codecov": "^3.1.0",
+    "nyc": "^13.1.0",
+    "tape": "^4.9.2",
+    "typescript": "^3.3.1"
   },
   "directories": {
     "example": "example",
