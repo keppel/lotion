@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://travis-ci.org/keppel/lotion">
-    <img src="https://img.shields.io/travis/keppel/lotion/master.svg"
+    <img src="https://img.shields.io/travis/nomic-io/lotion/master.svg"
          alt="Travis Build">
   </a>
   <a href="https://www.npmjs.com/package/lotion">
