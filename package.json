@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "publish": "tsc",
-    "test": "tsc && ava"
+    "test": "tsc && nyc -r html -r text ava"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
