@@ -8,5 +8,7 @@ coverage
 test/
 docs/
 src/
-.allcontributorsrc
 .travis.yml
+example
+tsconfig.json
+.all-contributorsrc
