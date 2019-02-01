@@ -18,6 +18,7 @@
     "get-port": "^4.0.0",
     "jpfs": "0.0.4",
     "lotion-connect": "^0.1.9",
+    "lotion-router": "^2.1.0",
     "lotion-state-machine": "^0.2.0",
     "peer-channel": "^0.1.2",
     "tendermint-node": "^3.5.0"
