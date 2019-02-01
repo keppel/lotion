@@ -1,11 +1,12 @@
 let test = require('ava')
 let lotion = require('../')
 
-const RPC_PORT = 26659
-
 test('counter app with module api', async function(t) {
+  let rpcPort = 30001
   let app = lotion({
-    rpcPort: RPC_PORT,
+    p2pPort: 30000,
+    rpcPort,
+    abciPort: 30002,
     initialState: { count: 'foo' }
   })
 
@@ -55,7 +56,7 @@ test('counter app with module api', async function(t) {
 
   let { state, send } = await lotion.connect(
     null,
-    { genesis: require(genesisPath), nodes: [`ws://localhost:${RPC_PORT}`] }
+    { genesis: require(genesisPath), nodes: [`ws://localhost:${rpcPort}`] }
   )
 
   let txCount = await state.a.transactionCount
