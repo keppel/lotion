@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "publish": "tsc",
-    "test": "tsc && nyc -r html -r text ava"
+    "test": "tsc && depcheck --ignores=@types/node && nyc -r html -r text ava"
   },
   "keywords": [],
   "author": "Judd Keppel <kepzorz@gmail.com>",
@@ -18,16 +18,16 @@
     "get-port": "^4.0.0",
     "jpfs": "0.0.4",
     "lotion-connect": "^0.1.9",
-    "lotion-router": "^2.1.0",
     "lotion-state-machine": "^0.2.0",
     "peer-channel": "^0.1.2",
-    "tendermint-node": "^3.5.0"
+    "tendermint": "^3.4.0",
+    "tendermint-node": "^3.5.0",
+    "varstruct": "^6.1.2"
   },
   "devDependencies": {
     "ava": "^0.25.0",
-    "codecov": "^3.1.0",
+    "depcheck": "^0.7.1",
     "nyc": "^13.1.0",
-    "tape": "^4.9.2",
     "typescript": "^3.3.1"
   },
   "directories": {
