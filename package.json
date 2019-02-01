@@ -26,5 +26,17 @@
   "devDependencies": {
     "ava": "^0.25.0",
     "typescript": "^3.2.2"
-  }
+  },
+  "directories": {
+    "example": "example",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomic-io/lotion.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nomic-io/lotion/issues"
+  },
+  "homepage": "https://github.com/nomic-io/lotion#readme"
 }
