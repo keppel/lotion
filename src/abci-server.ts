@@ -81,7 +81,6 @@ export default function createABCIServer(
           power: { low: validators[pubKey], high: 0 }
         })
       }
-      height++
       return {
         validatorUpdates
       }
@@ -89,6 +88,7 @@ export default function createABCIServer(
     commit() {
       return new Promise(async (resolve, reject) => {
         let data = stateMachine.commit()
+        height++
         await fs.writeFile(
           stateFilePath,
           djson.stringify({
