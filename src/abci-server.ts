@@ -18,25 +18,23 @@ export default function createABCIServer(
   let stateFilePath = join(lotionAppHome, 'state.json')
   let height = 0
   let abciServer = createServer({
-    info(request) {
-      return new Promise(async (resolve, reject) => {
-        await fs.ensureFile(stateFilePath)
-        try {
-          let stateFile = djson.parse(await fs.readFile(stateFilePath, 'utf8'))
-          let rootHash = createHash('sha256')
-            .update(djson.stringify(stateFile.state))
-            .digest()
+    async info(request) {
+      let stateFileExists = await fs.pathExists(stateFilePath)
+      if (stateFileExists) {
+        let stateFile = djson.parse(await fs.readFile(stateFilePath, 'utf8'))
+        let rootHash = createHash('sha256')
+          .update(djson.stringify(stateFile.state))
+          .digest()
 
-          stateMachine.initialize(stateFile.state, stateFile.context, true)
-          height = stateFile.height
-          resolve({
-            lastBlockAppHash: rootHash,
-            lastBlockHeight: stateFile.height
-          })
-        } catch (e) {
-          resolve({})
+        stateMachine.initialize(stateFile.state, stateFile.context, true)
+        height = stateFile.height
+        return {
+          lastBlockAppHash: rootHash,
+          lastBlockHeight: stateFile.height
         }
-      })
+      } else {
+        return {}
+      }
     },
 
     deliverTx(request) {
@@ -85,20 +83,22 @@ export default function createABCIServer(
         validatorUpdates
       }
     },
-    commit() {
-      return new Promise(async (resolve, reject) => {
-        let data = stateMachine.commit()
-        height++
-        await fs.writeFile(
-          stateFilePath,
-          djson.stringify({
-            state: stateMachine.query(),
-            height: height,
-            context: stateMachine.context()
-          })
-        )
-        resolve({ data: Buffer.from(data, 'hex') })
-      })
+    async commit() {
+      let data = stateMachine.commit()
+      height++
+      let newStateFilePath = join(lotionAppHome, `state-${height}.json`)
+      let context = Object.assign({}, stateMachine.context())
+      delete context.rootState
+      await fs.writeFile(
+        newStateFilePath,
+        djson.stringify({
+          context,
+          state: stateMachine.query(),
+          height: height
+        })
+      )
+      await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
+      return { data: Buffer.from(data, 'hex') }
     },
     initChain(request) {
       /**
