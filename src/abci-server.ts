@@ -15,7 +15,7 @@ export default function createABCIServer(
   initialState,
   lotionAppHome
 ): any {
-  let stateFilePath = join(lotionAppHome, 'state.json')
+  let stateFilePath = join(lotionAppHome, 'prev-state.json')
   let height = 0
   let abciServer = createServer({
     async info(request) {
@@ -86,7 +86,11 @@ export default function createABCIServer(
     async commit() {
       let data = stateMachine.commit()
       height++
-      let newStateFilePath = join(lotionAppHome, `state-${height}.json`)
+      let newStateFilePath = join(lotionAppHome, `state.json`)
+      if (await fs.pathExists(newStateFilePath)) {
+        await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
+      }
+
       let context = Object.assign({}, stateMachine.context())
       delete context.rootState
       await fs.writeFile(
@@ -97,7 +101,6 @@ export default function createABCIServer(
           height: height
         })
       )
-      await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
       return { data: Buffer.from(data, 'hex') }
     },
     initChain(request) {
