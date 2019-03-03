@@ -21,6 +21,7 @@ interface ApplicationConfig extends BaseApplicationConfig {
   keyPath?: string
   genesisPath?: string
   peers?: Array<string>
+  discovery?: boolean
 }
 
 interface PortMap {
@@ -48,6 +49,7 @@ class LotionApp implements Application {
   private keyPath: string
   private initialState: object
   private logTendermint: boolean
+  private discovery: boolean = true
   private home: string
   private lotionHome: string = join(homedir(), '.lotion', 'networks')
 
@@ -64,6 +66,7 @@ class LotionApp implements Application {
     this.keyPath = config.keyPath
     this.genesisPath = config.genesisPath
     this.peers = config.peers
+    this.discovery = config.discovery == null ? true : config.discovery
 
     this.setHome()
     Object.assign(this, this.application)
@@ -146,11 +149,13 @@ class LotionApp implements Application {
     this.setGCI()
 
     // start discovery server
-    this.discoveryServer = createDiscoveryServer({
-      GCI: this.GCI,
-      genesis: this.genesis,
-      rpcPort: this.ports.rpc
-    })
+    if (this.discovery) {
+      this.discoveryServer = createDiscoveryServer({
+        GCI: this.GCI,
+        genesis: this.genesis,
+        rpcPort: this.ports.rpc
+      })
+    }
 
     let appInfo = this.getAppInfo()
 
