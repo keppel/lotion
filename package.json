@@ -21,7 +21,7 @@
     "lotion-state-machine": "^0.2.0",
     "peer-channel": "^0.1.2",
     "tendermint": "^4.0.2",
-    "tendermint-node": "^5.0.2",
+    "tendermint-node": "^5.1.1",
     "varstruct": "^6.1.2"
   },
   "devDependencies": {
