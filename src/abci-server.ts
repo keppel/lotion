@@ -1,10 +1,11 @@
 import djson = require('deterministic-json')
 import vstruct = require('varstruct')
 
-let createServer = require('abci')
 let { createHash } = require('crypto')
 let fs = require('fs-extra')
 let { join } = require('path')
+let createServer = require('abci')
+let merk = require('merk')
 
 export interface ABCIServer {
   listen(port)
@@ -15,21 +16,36 @@ export default function createABCIServer(
   initialState,
   lotionAppHome
 ): any {
+  let stateDbPath = join(lotionAppHome, 'state.db')
   let stateFilePath = join(lotionAppHome, 'prev-state.json')
+
   let height = 0
+  let state
   let abciServer = createServer({
     async info(request) {
-      let stateFileExists = await fs.pathExists(stateFilePath)
-      if (stateFileExists) {
-        let stateFile = djson.parse(await fs.readFile(stateFilePath, 'utf8'))
-        let rootHash = createHash('sha256')
-          .update(djson.stringify(stateFile.state))
-          .digest()
+      let stateExists = await fs.pathExists(stateFilePath)
+      state = await merk(state)
+      if (stateExists) {
+        let stateFile
+        try {
+          let stateFileJSON = await fs.readFile(stateFilePath, 'utf8')
+          stateFile = JSON.parse(stateFileJSON)
+        } catch (err) {
+          // TODO: warning log
+          // error reading file, replay chain
+          return {}
+        }
 
-        stateMachine.initialize(stateFile.state, stateFile.context, true)
+        if (stateFile.rootHash !== merk.hash(state).toString('hex')) {
+          // merk db and JSON file don't match, let's replay the chain
+          // TODO: warning log since we probably want to know this is happening
+          return {}
+        }
+
+        stateMachine.initialize(state, {}, true)
         height = stateFile.height
         return {
-          lastBlockAppHash: rootHash,
+          lastBlockAppHash: state.hash(),
           lastBlockHeight: stateFile.height
         }
       } else {
@@ -84,24 +100,27 @@ export default function createABCIServer(
       }
     },
     async commit() {
-      let data = stateMachine.commit()
+      stateMachine.commit()
       height++
+
       let newStateFilePath = join(lotionAppHome, `state.json`)
       if (await fs.pathExists(newStateFilePath)) {
         await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
       }
 
-      let context = Object.assign({}, stateMachine.context())
-      delete context.rootState
+      // it's ok if merk commit and state file don't update atomically,
+      // we will just fall back to replaying the chain next time we load
+      await merk.commit(state)
+
       await fs.writeFile(
         newStateFilePath,
-        djson.stringify({
-          context,
-          state: stateMachine.query(),
-          height: height
+        JSON.stringify({
+          height: height,
+          rootHash: state.hash().toString('base64')
         })
       )
-      return { data: Buffer.from(data, 'hex') }
+
+      return { data: merk.hash(state) }
     },
     initChain(request) {
       /**
