@@ -4,6 +4,7 @@ import vstruct = require('varstruct')
 let { createHash } = require('crypto')
 let fs = require('fs-extra')
 let { join } = require('path')
+let level = require('level')
 let createServer = require('abci')
 let merk = require('merk')
 
@@ -12,19 +13,17 @@ export interface ABCIServer {
 }
 
 export default function createABCIServer(
+  state,
   stateMachine,
   initialState,
   lotionAppHome
 ): any {
-  let stateDbPath = join(lotionAppHome, 'state.db')
   let stateFilePath = join(lotionAppHome, 'prev-state.json')
 
   let height = 0
-  let state
   let abciServer = createServer({
     async info(request) {
       let stateExists = await fs.pathExists(stateFilePath)
-      state = await merk(state)
       if (stateExists) {
         let stateFile
         try {
@@ -36,16 +35,20 @@ export default function createABCIServer(
           return {}
         }
 
-        if (stateFile.rootHash !== merk.hash(state).toString('hex')) {
+        let rootHash = merk.hash(state)
+        if (rootHash != null) {
+          rootHash =  rootHash.toString('base64')
+        }
+        if (stateFile.rootHash !== rootHash) {
           // merk db and JSON file don't match, let's replay the chain
           // TODO: warning log since we probably want to know this is happening
           return {}
         }
 
-        stateMachine.initialize(state, {}, true)
+        stateMachine.initialize(null, {}, true)
         height = stateFile.height
         return {
-          lastBlockAppHash: state.hash(),
+          lastBlockAppHash: rootHash,
           lastBlockHeight: stateFile.height
         }
       } else {
@@ -80,6 +83,9 @@ export default function createABCIServer(
       }
     },
     beginBlock(request) {
+      // ensure we don't have any changes since last commit
+      merk.rollback(state)
+
       let time = request.header.time.seconds.toNumber()
       stateMachine.transition({ type: 'begin-block', data: { time } })
       return {}
@@ -111,16 +117,23 @@ export default function createABCIServer(
       // it's ok if merk commit and state file don't update atomically,
       // we will just fall back to replaying the chain next time we load
       await merk.commit(state)
-
+      let rootHash = null
+      try {
+        // TODO: make this return null in merk instead of throwing
+        rootHash = merk.hash(state)
+      } catch (err) {
+        // handle empty merk store, hash stays null
+      }
+      
       await fs.writeFile(
         newStateFilePath,
         JSON.stringify({
           height: height,
-          rootHash: state.hash().toString('base64')
+          rootHash: rootHash ? rootHash.toString('base64') : null
         })
       )
 
-      return { data: merk.hash(state) }
+      return { data: rootHash }
     },
     initChain(request) {
       /**
@@ -129,18 +142,20 @@ export default function createABCIServer(
        */
       let initialInfo = buildInitialInfo(request)
       stateMachine.initialize(initialState, initialInfo)
+      await merk.commit(state)
       return {}
     },
-    query(request) {
+    async query(request) {
       let path = request.path
-
-      let queryResponse: object = stateMachine.query(path)
-      let value = Buffer.from(djson.stringify(queryResponse)).toString('base64')
-
-      return {
-        value,
-        height
+      let proof = null
+      try {
+        proof = await merk.proof(state, path)
+        // TODO: make this return null in merk?
+      } catch (err) {
+        // handle empty merk store, proof is null
       }
+      let proofJSON = JSON.stringify(proof)
+      return { value: proofJSON, height }
     }
   })
 
