@@ -17,7 +17,7 @@
     "discovery-channel": "^5.5.1",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
-    "lotion-connect": "^0.1.9",
+    "lotion-connect": "^0.1.15",
     "lotion-state-machine": "^0.2.0",
     "tendermint": "^4.0.2",
     "tendermint-node": "^5.1.1",
