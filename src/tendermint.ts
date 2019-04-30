@@ -113,14 +113,23 @@ export default async function createTendermintProcess({
       fs.copySync(keyPath, privValPath)
     }
   }
+
+  let closing = false
+
   let tendermintProcess = tendermint.node(home, opts)
   if (logTendermint) {
     tendermintProcess.stdout.pipe(process.stdout)
     tendermintProcess.stderr.pipe(process.stderr)
   }
   tendermintProcess.then(() => {
+    if (closing) return
     throw new Error('Tendermint exited unexpectedly')
   })
   await tendermintProcess.synced()
-  return {}
+  return {
+    close () {
+      closing = true
+      tendermintProcess.kill()
+    }
+  }
 }

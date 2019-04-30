@@ -12,16 +12,15 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^10.5.2",
-    "abci": "^4.0.2",
+    "abci": "^5.0.1",
     "deterministic-json": "^1.0.5",
+    "discovery-channel": "^5.5.1",
     "fs-extra": "^7.0.0",
     "get-port": "^4.0.0",
-    "jpfs": "0.0.4",
     "lotion-connect": "^0.1.9",
     "lotion-state-machine": "^0.2.0",
-    "peer-channel": "^0.1.2",
-    "tendermint": "^3.4.0",
-    "tendermint-node": "^3.5.0",
+    "tendermint": "^4.0.2",
+    "tendermint-node": "^5.1.1",
     "varstruct": "^6.1.2"
   },
   "devDependencies": {
