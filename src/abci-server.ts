@@ -129,7 +129,7 @@ export default function createABCIServer(
         })
       )
 
-      return { data: Buffer.from(rootHash, 'hex') }
+      return { data: rootHash ? Buffer.from(rootHash, 'hex') : Buffer.alloc(0) }
     },
     async initChain(request) {
       /**
@@ -142,15 +142,18 @@ export default function createABCIServer(
       return {}
     },
     async query(request) {
+      // assert merk tree is not empty
+      // TODO: change merk so we don't have to do this
+      try {
+        merk.hash(state)
+      } catch (err) {
+        return { value: Buffer.from('null'), height }
+      }
+
       let path = request.path
       let proof = null
       let proofHeight = height
-      try {
-        proof = await merk.proof(state, path)
-        // TODO: make this return null in merk?
-      } catch (err) {
-        // handle empty merk store, proof is null
-      }
+      proof = await merk.proof(state, path)
       let proofJSON = JSON.stringify(proof)
       let proofBytes = Buffer.from(proofJSON)
       return {
