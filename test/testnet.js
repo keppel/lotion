@@ -54,7 +54,6 @@ test('counter app testnet', async function(t) {
   let a = await startApp(nodeA)
   let aRpc = RpcClient(`localhost:${nodeA.rpcPort}`)
   let status = await aRpc.status()
-  console.log('started a')
 
   let b = await startApp({
     ...nodeB,
@@ -66,7 +65,6 @@ test('counter app testnet', async function(t) {
   status = await bRpc.status()
   let bPubKey = status.validator_info.pub_key.value
   t.true(status.sync_info.latest_block_height >= 1)
-  console.log('started b')
 
   let alc = await lotion.connect(
     null,
@@ -75,7 +73,6 @@ test('counter app testnet', async function(t) {
       nodes: [`ws://localhost:${nodeA.rpcPort}`]
     }
   )
-  console.log('connected to a')
   let blc = await lotion.connect(
     null,
     {
@@ -83,22 +80,17 @@ test('counter app testnet', async function(t) {
       nodes: [`ws://localhost:${nodeB.rpcPort}`]
     }
   )
-  console.log('connected to b')
 
   await blc.send({ pubKey: bPubKey })
-  console.log('send tx')
 
   let txCount = await alc.state.txCount
   t.is(txCount, 1)
-  console.log('got state')
 
   await Promise.all([alc.send({ letter: 'a' }), blc.send({ letter: 'b' })])
   t.is(await alc.state.txCount, 3)
   t.true((await alc.state.blockCount) > 0)
-  console.log('sent more txs')
 
   t.is(await alc.state.word, await blc.state.word)
-  console.log('got state')
 })
 
 function delay(ms = 1000) {

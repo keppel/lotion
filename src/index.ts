@@ -13,6 +13,7 @@ import { randomBytes, createHash } from 'crypto'
 import fs = require('fs-extra')
 import getPort = require('get-port')
 import DJSON = require('deterministic-json')
+import level = require('level')
 import merk = require('merk')
 
 interface ApplicationConfig extends BaseApplicationConfig {
@@ -73,6 +74,7 @@ class LotionApp implements Application {
     this.discovery = config.discovery == null ? true : config.discovery
 
     this.setHome()
+
     Object.assign(this, this.application)
   }
 
@@ -131,11 +133,12 @@ class LotionApp implements Application {
     await this.assignPorts()
     await fs.mkdirp(this.home)
 
+    // create or load state db
     this.db = level(join(this.home, 'state.db'))
     this.state = await merk(this.db)
 
     // start state machine
-    this.stateMachine = this.application.compile()
+    this.stateMachine = this.application.compile(this.state)
 
     this.abciServer = createABCIServer(
       this.state,

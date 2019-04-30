@@ -4,7 +4,6 @@ import vstruct = require('varstruct')
 let { createHash } = require('crypto')
 let fs = require('fs-extra')
 let { join } = require('path')
-let level = require('level')
 let createServer = require('abci')
 let merk = require('merk')
 
@@ -36,9 +35,6 @@ export default function createABCIServer(
         }
 
         let rootHash = merk.hash(state)
-        if (rootHash != null) {
-          rootHash =  rootHash.toString('base64')
-        }
         if (stateFile.rootHash !== rootHash) {
           // merk db and JSON file don't match, let's replay the chain
           // TODO: warning log since we probably want to know this is happening
@@ -124,18 +120,18 @@ export default function createABCIServer(
       } catch (err) {
         // handle empty merk store, hash stays null
       }
-      
+
       await fs.writeFile(
         newStateFilePath,
         JSON.stringify({
           height: height,
-          rootHash: rootHash ? rootHash.toString('base64') : null
+          rootHash: rootHash
         })
       )
 
-      return { data: rootHash }
+      return { data: Buffer.from(rootHash, 'hex') }
     },
-    initChain(request) {
+    async initChain(request) {
       /**
        * in next abci version, we'll get a timestamp here.
        * height is no longer tracked on info (we want to encourage isomorphic chain/channel code)
@@ -148,6 +144,7 @@ export default function createABCIServer(
     async query(request) {
       let path = request.path
       let proof = null
+      let proofHeight = height
       try {
         proof = await merk.proof(state, path)
         // TODO: make this return null in merk?
@@ -155,7 +152,11 @@ export default function createABCIServer(
         // handle empty merk store, proof is null
       }
       let proofJSON = JSON.stringify(proof)
-      return { value: proofJSON, height }
+      let proofBytes = Buffer.from(proofJSON)
+      return {
+        value: proofBytes,
+        height: proofHeight
+      }
     }
   })
 
