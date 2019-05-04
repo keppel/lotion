@@ -64,7 +64,7 @@ test('counter app testnet', async function(t) {
 
   status = await bRpc.status()
   let bPubKey = status.validator_info.pub_key.value
-  t.true(status.sync_info.latest_block_height > 1)
+  t.true(status.sync_info.latest_block_height >= 1)
 
   let alc = await lotion.connect(
     null,

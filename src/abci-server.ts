@@ -1,32 +1,47 @@
 import djson = require('deterministic-json')
 import vstruct = require('varstruct')
 
-let createServer = require('abci')
 let { createHash } = require('crypto')
 let fs = require('fs-extra')
 let { join } = require('path')
+let createServer = require('abci')
+let merk = require('merk')
 
 export interface ABCIServer {
   listen(port)
 }
 
 export default function createABCIServer(
+  state,
   stateMachine,
   initialState,
   lotionAppHome
 ): any {
   let stateFilePath = join(lotionAppHome, 'prev-state.json')
+
   let height = 0
   let abciServer = createServer({
     async info(request) {
-      let stateFileExists = await fs.pathExists(stateFilePath)
-      if (stateFileExists) {
-        let stateFile = djson.parse(await fs.readFile(stateFilePath, 'utf8'))
-        let rootHash = createHash('sha256')
-          .update(djson.stringify(stateFile.state))
-          .digest()
+      let stateExists = await fs.pathExists(stateFilePath)
+      if (stateExists) {
+        let stateFile
+        try {
+          let stateFileJSON = await fs.readFile(stateFilePath, 'utf8')
+          stateFile = JSON.parse(stateFileJSON)
+        } catch (err) {
+          // TODO: warning log
+          // error reading file, replay chain
+          return {}
+        }
 
-        stateMachine.initialize(stateFile.state, stateFile.context, true)
+        let rootHash = merk.hash(state)
+        if (stateFile.rootHash !== rootHash) {
+          // merk db and JSON file don't match, let's replay the chain
+          // TODO: warning log since we probably want to know this is happening
+          return {}
+        }
+
+        stateMachine.initialize(null, {}, true)
         height = stateFile.height
         return {
           lastBlockAppHash: rootHash,
@@ -64,6 +79,9 @@ export default function createABCIServer(
       }
     },
     beginBlock(request) {
+      // ensure we don't have any changes since last commit
+      merk.rollback(state)
+
       let time = request.header.time.seconds.toNumber()
       stateMachine.transition({ type: 'begin-block', data: { time } })
       return {}
@@ -84,43 +102,63 @@ export default function createABCIServer(
       }
     },
     async commit() {
-      let data = stateMachine.commit()
+      stateMachine.commit()
       height++
+
       let newStateFilePath = join(lotionAppHome, `state.json`)
       if (await fs.pathExists(newStateFilePath)) {
         await fs.move(newStateFilePath, stateFilePath, { overwrite: true })
       }
 
-      let context = Object.assign({}, stateMachine.context())
-      delete context.rootState
+      // it's ok if merk commit and state file don't update atomically,
+      // we will just fall back to replaying the chain next time we load
+      await merk.commit(state)
+      let rootHash = null
+      try {
+        // TODO: make this return null in merk instead of throwing
+        rootHash = merk.hash(state)
+      } catch (err) {
+        // handle empty merk store, hash stays null
+      }
+
       await fs.writeFile(
         newStateFilePath,
-        djson.stringify({
-          context,
-          state: stateMachine.query(),
-          height: height
+        JSON.stringify({
+          height: height,
+          rootHash: rootHash
         })
       )
-      return { data: Buffer.from(data, 'hex') }
+
+      return { data: rootHash ? Buffer.from(rootHash, 'hex') : Buffer.alloc(0) }
     },
-    initChain(request) {
+    async initChain(request) {
       /**
        * in next abci version, we'll get a timestamp here.
        * height is no longer tracked on info (we want to encourage isomorphic chain/channel code)
        */
       let initialInfo = buildInitialInfo(request)
       stateMachine.initialize(initialState, initialInfo)
+      await merk.commit(state)
       return {}
     },
-    query(request) {
+    async query(request) {
+      // assert merk tree is not empty
+      // TODO: change merk so we don't have to do this
+      try {
+        merk.hash(state)
+      } catch (err) {
+        return { value: Buffer.from('null'), height }
+      }
+
       let path = request.path
-
-      let queryResponse: object = stateMachine.query(path)
-      let value = Buffer.from(djson.stringify(queryResponse)).toString('base64')
-
+      let proof = null
+      let proofHeight = height
+      proof = await merk.proof(state, path)
+      let proofJSON = JSON.stringify(proof)
+      let proofBytes = Buffer.from(proofJSON)
       return {
-        value,
-        height
+        value: proofBytes,
+        height: proofHeight
       }
     }
   })
