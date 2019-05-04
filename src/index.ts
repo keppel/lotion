@@ -124,6 +124,13 @@ class LotionApp implements Application {
           .update(fs.readFileSync(this.config.keyPath))
           .digest('hex')
       )
+    } else if (this.config.genesisPath && !this.config.keyPath) {
+      this.home = join(
+        this.lotionHome,
+        createHash('sha256')
+          .update(fs.readFileSync(this.config.genesisPath))
+          .digest('hex')
+      )
     } else {
       this.home = join(this.lotionHome, randomBytes(16).toString('hex'))
     }
