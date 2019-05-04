@@ -92,17 +92,15 @@ export default async function createTendermintProcess({
   }
 
   /**
-   * overwrite the priv_validator.json file with the one specified.
+   * overwrite the priv_validator_key.json file with the one specified.
    *
    * the file is only copied if the pub_key in the specified file
    * doesn't match the one in the tendermint home directory.
    *
-   * information about our validator's last signature is kept in
-   * priv_validator.json as a safeguard against accidental double-signing.
    */
 
   if (keyPath) {
-    let privValPath = join(home, 'config', 'priv_validator.json')
+    let privValPath = join(home, 'config', 'priv_validator_key.json')
     if (!fs.existsSync(keyPath)) {
       throw new Error(`no keys file found at ${keyPath}`)
     }
@@ -127,7 +125,7 @@ export default async function createTendermintProcess({
   })
   await tendermintProcess.synced()
   return {
-    close () {
+    close() {
       closing = true
       tendermintProcess.kill()
     }
