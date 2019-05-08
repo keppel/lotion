@@ -37,6 +37,7 @@ interface AppInfo {
   ports: PortMap
   GCI: string
   genesisPath: string
+  home: string
 }
 
 class LotionApp implements Application {
@@ -96,7 +97,8 @@ class LotionApp implements Application {
     return {
       ports: this.ports,
       GCI: this.GCI,
-      genesisPath: this.genesisPath
+      genesisPath: this.genesisPath,
+      home: this.home
     }
   }
 
