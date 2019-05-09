@@ -134,7 +134,7 @@ Here are the available options for `opts` which you can override:
   peers: [],                   // array of '<host>:<p2pport>' of initial tendermint nodes to connect to. does automatic peer discovery if not specified.
   logTendermint: false,        // if true, shows all output from the underlying tendermint process
   p2pPort: 26658,              // port to use for tendermint peer connections
-  rpcPort: 26657        // port to use for tendermint rpc
+  rpcPort: 26657               // port to use for tendermint rpc
 }
 ```
 
