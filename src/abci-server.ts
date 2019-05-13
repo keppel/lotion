@@ -125,7 +125,8 @@ export default function createABCIServer(
         newStateFilePath,
         JSON.stringify({
           height: height,
-          rootHash: rootHash
+          rootHash: rootHash,
+          validators: stateMachine.context().validators
         })
       )
 
