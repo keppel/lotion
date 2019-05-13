@@ -41,7 +41,11 @@ export default function createABCIServer(
           return {}
         }
 
-        stateMachine.initialize(null, {}, true)
+        stateMachine.initialize(
+          null,
+          { validators: stateFile.validators || {} },
+          true
+        )
         height = stateFile.height
         return {
           lastBlockAppHash: rootHash,
