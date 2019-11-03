@@ -21,7 +21,7 @@
     "lotion-connect": "0.1.22",
     "lotion-state-machine": "^0.2.3",
     "merk": "^1.3.9",
-    "tendermint": "^4.0.2",
+    "tendermint": "^4.0.8",
     "tendermint-node": "^5.1.1",
     "varstruct": "^6.1.2"
   },
