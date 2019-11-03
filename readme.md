@@ -32,7 +32,7 @@
 </p>
 <br>
 
-Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of [Tendermint](https://tendermint.com) using the [ABCI](https://github.com/tendermint/abci) protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the [Cosmos Network](https://cosmos.network/) using [IBC](https://github.com/cosmos/ibc).
+Lotion is a new way to create blockchain apps in JavaScript, which aims to make writing new blockchains fast and fun. It builds on top of [Tendermint](https://tendermint.com) using the [ABCI](https://github.com/tendermint/abci) protocol. Lotion lets you write secure, scalable applications that can easily interoperate with other blockchains on the [Cosmos Network](https://cosmos.network/) using [IBC](https://github.com/cosmos/ics).
 
 Lotion itself is a tiny framework; its true power comes from the network of small, focused modules built upon it. Adding a fully-featured cryptocurrency to your blockchain, for example, takes only a [few lines of code.](https://github.com/mappum/coins)
 
