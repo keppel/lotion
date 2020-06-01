@@ -22,7 +22,7 @@
     "lotion-state-machine": "^0.2.3",
     "merk": "^1.3.9",
     "tendermint": "^4.0.2",
-    "tendermint-node": "^5.1.1",
+    "tendermint-node": "5.1.5",
     "varstruct": "^6.1.2"
   },
   "devDependencies": {
